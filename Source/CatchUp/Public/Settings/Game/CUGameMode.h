@@ -3,25 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CatchUpTypes.h"
 #include "GameFramework/GameModeBase.h"
 #include "CUGameMode.generated.h"
 
 class ACUCharacter;
-
-USTRUCT()
-struct FGameSettings
-{
-	GENERATED_BODY()
-
-public:
-	
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "1"))
-	int32 PlayerNum = 2;
-
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
-	int32 CatcherNum = 1;
-	
-};
 
 UCLASS()
 class CATCHUP_API ACUGameMode : public AGameModeBase
@@ -30,11 +16,16 @@ class CATCHUP_API ACUGameMode : public AGameModeBase
 
 private:
 
+	UPROPERTY()
+	TSet<APlayerController*> Players;
+	
 	UPROPERTY(EditDefaultsOnly)
 	FGameSettings GameSettings;
 
 	TQueue<ACUCharacter*> CharactersPool;
 
+	FTimerHandle StartMatchTimerHandle;
+	
 public:
 
 	const FGameSettings& GetGameSettings() const { return GameSettings; }
@@ -42,14 +33,22 @@ public:
 private:
 	
 	ACUGameMode();
-
+	
 	virtual void BeginPlay() override;
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	
 	void InitCharactersPool();
 
+	void RestartAllPlayers();
+	
 	virtual void RestartPlayer(AController* NewPlayer) override;
 
 	void SetupPlayer(AController* Controller, APawn* Pawn, const FTransform& InitialTrnsform);
+
+	void GiveCharacterTo(AController* Playerm, const float& Delay);
+
+	void ChangeMatchState(const EMatchState& NewState);
+
+	void TickStartMatch();
 };

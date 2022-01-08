@@ -8,7 +8,6 @@ ACUCharacter::ACUCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	bUseControllerRotationPitch = true;
 	bUseControllerRotationYaw = true;
 	
 	SetupDefaultState();
@@ -42,8 +41,6 @@ void ACUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	InputComponent->BindAxis("MoveForward", this, &ACUCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ACUCharacter::MoveRight);
-	InputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	InputComponent->BindAxis("LookAt", this, &APawn::AddControllerPitchInput);
 }
 
 void ACUCharacter::MoveForward(float Amount)

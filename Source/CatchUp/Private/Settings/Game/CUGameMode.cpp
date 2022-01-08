@@ -2,6 +2,7 @@
 
 #include "CUGameMode.h"
 #include "CUCharacter.h"
+#include "CUGameState.h"
 #include "CUHUD.h"
 #include "CUPlayerController.h"
 #include "CUPlayerState.h"
@@ -13,6 +14,7 @@ ACUGameMode::ACUGameMode()
 	PlayerControllerClass = ACUPlayerController::StaticClass();
 	PlayerStateClass = ACUPlayerState::StaticClass();
 	HUDClass = ACUHUD::StaticClass();
+	GameStateClass = ACUGameState::StaticClass();
 }
 
 void ACUGameMode::BeginPlay()
@@ -24,12 +26,10 @@ void ACUGameMode::BeginPlay()
 
 void ACUGameMode::PostLogin(APlayerController* NewPlayer)
 {
-	// Runs shared initialization that can happen during seamless travel as well
 	GenericPlayerInitialization(NewPlayer);
 
-	// Perform initialization that only happens on initially joining a server
 	UWorld* World = GetWorld();
-
+	
 	NewPlayer->ClientCapBandwidth(NewPlayer->Player->CurrentNetSpeed);
 
 	if (MustSpectate(NewPlayer))
@@ -38,26 +38,24 @@ void ACUGameMode::PostLogin(APlayerController* NewPlayer)
 	}
 	else
 	{
-		// If NewPlayer is not only a spectator and has a valid ID, add him as a user to the replay.
 		const FUniqueNetIdRepl& NewPlayerStateUniqueId = NewPlayer->PlayerState->GetUniqueId();
+		
 		if (NewPlayerStateUniqueId.IsValid())
-		{
 			GetGameInstance()->AddUserToReplay(NewPlayerStateUniqueId.ToString());
-		}
 	}
 
 	if (GameSession)
-	{
 		GameSession->PostLogin(NewPlayer);
-	}
 
-	// Notify Blueprints that a new player has logged in.  Calling it here, because this is the first time that the PlayerController can take RPCs
+	Players.Add(NewPlayer);
+	
 	K2_PostLogin(NewPlayer);
 	FGameModeEvents::GameModePostLoginEvent.Broadcast(this, NewPlayer);
 
-	const FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ACUGameMode::RestartPlayer, Cast<AController>(NewPlayer));
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Delegate, 1, false); // игрок получит персонажа через 1 сек
+	GiveCharacterTo(NewPlayer, 2.f);
+
+	if (Players.Num() == GameSettings.PlayerNum)
+		ChangeMatchState(EMatchState::PreStart);
 }
 
 void ACUGameMode::InitCharactersPool()
@@ -69,6 +67,12 @@ void ACUGameMode::InitCharactersPool()
 		if (NewCharacter != nullptr)
 			CharactersPool.Enqueue(NewCharacter);
 	}
+}
+
+void ACUGameMode::RestartAllPlayers()
+{
+	for (auto Player : Players)
+		RestartPlayer(Player);
 }
 
 void ACUGameMode::RestartPlayer(AController* NewPlayer)
@@ -93,7 +97,7 @@ void ACUGameMode::RestartPlayer(AController* NewPlayer)
 	}
 	else
 	{
-		// выставить состояние персонажа по умолчанию
+		// TODO выставить состояние персонажа по умолчанию
 		
 		NewPlayer->GetPawn()->SetActorLocationAndRotation(StartSpot->GetActorLocation(), StartSpot->GetActorRotation());
 		
@@ -115,6 +119,58 @@ void ACUGameMode::SetupPlayer(AController* Controller, APawn* Pawn, const FTrans
 	Controller->SetControlRotation(Rotation.Rotator());
 
 	K2_OnRestartPlayer(Controller);
+}
+
+void ACUGameMode::GiveCharacterTo(AController* Player, const float& Delay)
+{
+	const FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ACUGameMode::RestartPlayer, Cast<AController>(Player));
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Delegate, Delay, false);
+}
+
+void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
+{
+	switch (NewState)
+	{
+	case EMatchState::PreStart:
+		{
+			// выдать игровые роли
+
+			FTimerHandle TimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this] { ChangeMatchState(EMatchState::Start); }, 3.f, false);
+		}
+		break;
+
+	case EMatchState::Start:
+		{			
+			RestartAllPlayers();
+
+			GetWorld()->GetTimerManager().SetTimer(StartMatchTimerHandle, this, &ACUGameMode::TickStartMatch, 1.f, true);
+		}
+		break;
+	}
+	
+	GetGameState<ACUGameState>()->ChangeMatchState(NewState);
+}
+
+void ACUGameMode::TickStartMatch()
+{
+	static int32 CurrentStartTick;
+	
+	if (CurrentStartTick == 0)
+		CurrentStartTick = GameSettings.StartMatchTicks;
+
+	if (CurrentStartTick > 0)
+	{
+		GetGameState<ACUGameState>()->OnStartMatchTicked(CurrentStartTick);
+		CurrentStartTick--;
+
+		if (CurrentStartTick == 0)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(StartMatchTimerHandle);
+			ChangeMatchState(EMatchState::InProgress);
+		}
+	}
 }
 
 

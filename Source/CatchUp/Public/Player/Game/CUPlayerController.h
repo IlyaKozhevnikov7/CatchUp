@@ -22,19 +22,21 @@ private:
 private:
 	
 	ACUPlayerController();
-	
-	virtual void OnPossess(APawn* InPawn) override;
 
-	virtual void OnUnPossess() override;
+	virtual void BeginPlay() override;
+
+	virtual void SetupInputComponent() override;
 
 	virtual void OnRep_PlayerState() override;
 	
 	virtual void OnRep_Pawn() override;
 
+	void HandleMatchState(const EMatchState& NewState);
+	
 #if WITH_EDITOR
 	
 	UFUNCTION(Exec)
-	void ChrangeGameRole(const EGameRole& NewRole);
+	void ChangeGameRole(const EGameRole& NewRole);
 
 	UFUNCTION(Server, Reliable)
 	void ChrangeGameRoleServer(const EGameRole& NewRole);
