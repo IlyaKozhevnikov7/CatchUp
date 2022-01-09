@@ -17,15 +17,21 @@ void ACUPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// пока хз как отключить прием инпутов со стороны сервера
 	if (HasAuthority() == false)
+	{
+		SetShowMouseCursor(false);
+
+		// пока хз как отключить прием инпутов со стороны сервера
 		GetWorld()->GetGameState<ACUGameState>()->MatchStateChangedEvent.AddUObject(this, &ACUPlayerController::HandleMatchState);
+	}
 }
 
 void ACUPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+	InputComponent->BindAction("Pause", IE_Pressed, this, &APlayerController::Pause).bExecuteWhenPaused = true;;
+	
 	InputComponent->BindAxis("Turn", this, &APlayerController::AddYawInput);
 	InputComponent->BindAxis("LookAt", this, &APlayerController::AddPitchInput);
 }
@@ -63,19 +69,19 @@ void ACUPlayerController::HandleMatchState(const EMatchState& NewState)
 	else if (NewState == EMatchState::InProgress)
 	{
 		if (GetPawn())
-		{
-			EnableInput(this);
 			GetPawn()->EnableInput(this);
-		}
 	}
-	else if (NewState == EMatchState::Paused || NewState == EMatchState::Ended)
+
+	if (NewState == EMatchState::Paused)
 	{
 		if (GetPawn())
-		{
-			DisableInput(this);
 			GetPawn()->DisableInput(this);
-		}	
 	}
+}
+
+void ACUPlayerController::Pause()
+{
+	Super::Pause();
 }
 
 void ACUPlayerController::ChangeGameRole(const EGameRole& NewRole)

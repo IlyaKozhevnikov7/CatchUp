@@ -32,6 +32,8 @@ private:
 	virtual void OnRep_Pawn() override;
 
 	void HandleMatchState(const EMatchState& NewState);
+
+	virtual void Pause() override;
 	
 #if WITH_EDITOR
 	

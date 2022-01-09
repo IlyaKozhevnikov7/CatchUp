@@ -58,6 +58,36 @@ void ACUGameMode::PostLogin(APlayerController* NewPlayer)
 		ChangeMatchState(EMatchState::PreStart);
 }
 
+bool ACUGameMode::AllowPausing(APlayerController* PC)
+{
+	return Super::AllowPausing(PC) && IsPaused() == false;
+}
+
+bool ACUGameMode::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate)
+{
+	const bool bResult = Super::SetPause(PC, CanUnpauseDelegate);
+
+	if (bResult)
+	{
+		PreviousState = GetGameState<ACUGameState>()->GetGameState();
+		ChangeMatchState(EMatchState::Paused);
+
+		GameState->ForceNetUpdate();
+	}
+	
+	return bResult;
+}
+
+bool ACUGameMode::ClearPause()
+{
+	const bool bResult = Super::ClearPause();
+
+	if (bResult)
+		ChangeMatchState(PreviousState);
+	
+	return bResult;
+}
+
 void ACUGameMode::InitCharactersPool()
 {
 	for (int32 Index = 0; Index < GameSettings.PlayerNum; Index++)
@@ -179,6 +209,12 @@ void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 
 	case EMatchState::Start:
 		{
+			// при переходе в Start, таймер, если он был запущен, должен продожить с места отанова
+			// тк в случае паузы таймеры тоже останавливаются
+			// тоже самое и с таймерами в других состояниях
+			if (GetWorld()->GetTimerManager().IsTimerActive(StartMatchTimerHandle))
+				break;
+			
 			GiveOutRoles();
 			RestartAllPlayers();
 
@@ -190,6 +226,11 @@ void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 
 	case EMatchState::InProgress:
 		{
+			static FTimerHandle MatchTimerHandle;
+
+			if (GetWorld()->GetTimerManager().IsTimerActive(MatchTimerHandle))
+				break;
+			
 			GetWorld()->GetTimerManager().SetTimer(MatchTimerHandle, [this]()
 			{
 				GetGameState<ACUGameState>()->OnMatchTimeChanged(CurrentMatchTime);

@@ -35,8 +35,6 @@ void ACUHUD::Init(ACUPlayerController* Controller)
 	check(PlayerState);
 
 	PlayerState->GameRoleChangedEvent.AddUObject(this, &ACUHUD::OnGameRoleChanged);
-
-	UE_LOG(CULogHUD, Display, TEXT("Init"));
 }
 
 void ACUHUD::OnNewCharacter(ACUCharacter* Character)
@@ -69,7 +67,7 @@ void ACUHUD::ActivateRoleWidget(const EGameRole& GameRole)
 {
 	if (ensureMsgf(RoleWidgets.Contains(GameRole), TEXT("Key [%s] is not exist in RoleWodgets"), *UEnum::GetValueAsString(GameRole)))
 	{
- 		if (ensureMsgf(CurrentRoleWidget == RoleWidgets[GameRole], TEXT("CurrentRoleWidget is already %s widget"), *UEnum::GetValueAsString(GameRole)))
+ 		if (ensureMsgf(CurrentRoleWidget == RoleWidgets[GameRole] || CurrentRoleWidget == nullptr, TEXT("CurrentRoleWidget is already %s widget"), *UEnum::GetValueAsString(GameRole)))
 			return;
 		
 		if (CurrentRoleWidget != nullptr)

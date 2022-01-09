@@ -25,10 +25,11 @@ private:
 
 	TQueue<ACUCharacter*> CharactersPool;
 
+	// Может быть нужно будет убрать в GameState
+	EMatchState PreviousState;
+	
 	// temp here
 	FTimerHandle StartMatchTimerHandle;
-
-	FTimerHandle MatchTimerHandle;
 	
 	int32 CurrentMatchTime;
 	
@@ -43,6 +44,12 @@ private:
 	virtual void BeginPlay() override;
 	
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	virtual bool AllowPausing(APlayerController* PC) override;
+	
+	virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate) override;
+
+	virtual bool ClearPause() override;
 	
 	void InitCharactersPool();
 
