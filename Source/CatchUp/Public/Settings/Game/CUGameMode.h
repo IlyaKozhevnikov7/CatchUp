@@ -8,6 +8,7 @@
 #include "CUGameMode.generated.h"
 
 class ACUCharacter;
+class ACUPlayerState;
 
 UCLASS()
 class CATCHUP_API ACUGameMode : public AGameModeBase
@@ -17,14 +18,19 @@ class CATCHUP_API ACUGameMode : public AGameModeBase
 private:
 
 	UPROPERTY()
-	TSet<APlayerController*> Players;
+	TArray<ACUPlayerState*> PlayerStates;
 	
 	UPROPERTY(EditDefaultsOnly)
 	FGameSettings GameSettings;
 
 	TQueue<ACUCharacter*> CharactersPool;
 
+	// temp here
 	FTimerHandle StartMatchTimerHandle;
+
+	FTimerHandle MatchTimerHandle;
+	
+	int32 CurrentMatchTime;
 	
 public:
 
@@ -46,6 +52,12 @@ private:
 
 	void SetupPlayer(AController* Controller, APawn* Pawn, const FTransform& InitialTrnsform);
 
+	void GiveOutRoles();
+
+	void SelectCatchers();
+
+	void SelectRunners();
+	
 	void GiveCharacterTo(AController* Playerm, const float& Delay);
 
 	void ChangeMatchState(const EMatchState& NewState);

@@ -30,15 +30,17 @@ void ACUGameState::ChangeMatchState(const EMatchState& NewState)
 
 void ACUGameState::OnStartMatchTicked_Implementation(const int32& Time)
 {
-	StartMatchTimeChangedEvent.Broadcast(Time);
+	if (HasAuthority() == false)
+		StartMatchTickedEvent.Broadcast(Time);
+}
+
+void ACUGameState::OnMatchTimeChanged_Implementation(const int32& NewTime)
+{
+	if (HasAuthority() == false)
+		MatchTimeChangedEvent.Broadcast(NewTime);
 }
 
 void ACUGameState::OnRep_MatchState()
 {
 	MatchStateChangedEvent.Broadcast(MatchState);
-}
-
-void ACUGameState::TickStartMatch(const int32& LastTime)
-{
-	StartMatchTimeChangedEvent.Broadcast(LastTime);
 }

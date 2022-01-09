@@ -24,13 +24,17 @@ private:
 	EGameRole GameRole;
 	
 protected:
-
+	
+	ACUPlayerState();
+	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 
 	void ChangeRole(const EGameRole& NewRole);
 	
+	bool IsCatchcer() const;
+
 private:
 	
 	UFUNCTION()

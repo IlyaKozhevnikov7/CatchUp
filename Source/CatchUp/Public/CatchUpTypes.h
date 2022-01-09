@@ -30,6 +30,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
 	int32 StartMatchTicks = 3;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0", ClampMax = "300"))
+	int32 MatchTime = 120;
 	
 };
 
@@ -41,4 +44,12 @@ enum class EGameRole : uint8
 	Runner = 0,
 	Catcher,
 	Indefined
+};
+
+// HUD
+
+UENUM()
+enum class EAdditionWidget : uint8
+{
+	Timer = 0
 };

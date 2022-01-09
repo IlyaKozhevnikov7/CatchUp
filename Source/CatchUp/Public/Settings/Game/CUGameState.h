@@ -8,7 +8,8 @@
 #include "CUGameState.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FMatchStateChanged, const EMatchState&);
-DECLARE_MULTICAST_DELEGATE_OneParam(FStartMatchTimeChanged, const float&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FStartMatchTicked, const int32&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FMatchTimeChanged, const int32&);
 
 UCLASS()
 class CATCHUP_API ACUGameState : public AGameStateBase
@@ -19,7 +20,9 @@ public:
 
 	FMatchStateChanged MatchStateChangedEvent;
 
-	FStartMatchTimeChanged StartMatchTimeChangedEvent;
+	FStartMatchTicked StartMatchTickedEvent;
+
+	FMatchTimeChanged MatchTimeChangedEvent;
 	
 private:
 
@@ -38,14 +41,15 @@ public:
 	
 	void ChangeMatchState(const EMatchState& NewState);
 
-	UFUNCTION(Client, Reliable)
+	UFUNCTION(NetMulticast, Reliable)
 	void OnStartMatchTicked(const int32& Time);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void OnMatchTimeChanged(const int32& NewTime);
+	
 private:
 
 	UFUNCTION()
 	void OnRep_MatchState();
-
-	void TickStartMatch(const int32& LastTime);
 	
 };

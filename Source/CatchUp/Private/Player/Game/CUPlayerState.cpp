@@ -5,6 +5,11 @@
 
 DEFINE_LOG_CATEGORY_STATIC(CULogPlayerState, All, All);
 
+ACUPlayerState::ACUPlayerState()
+{
+	GameRole = EGameRole::Indefined;
+}
+
 void ACUPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -13,12 +18,19 @@ void ACUPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 }
 
 void ACUPlayerState::ChangeRole(const EGameRole& NewRole)
-{	
+{
+	check(HasAuthority());
+	
 	if (GameRole != NewRole)
 	{
 		GameRole = NewRole;
-		GameRoleChangedEvent.Broadcast(GameRole); // только для сервера
+		GameRoleChangedEvent.Broadcast(GameRole);
 	}
+}
+
+bool ACUPlayerState::IsCatchcer() const
+{
+	return GameRole == EGameRole::Catcher;
 }
 
 void ACUPlayerState::OnRep_GameRole()

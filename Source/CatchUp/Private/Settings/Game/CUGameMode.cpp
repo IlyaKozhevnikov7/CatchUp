@@ -47,14 +47,14 @@ void ACUGameMode::PostLogin(APlayerController* NewPlayer)
 	if (GameSession)
 		GameSession->PostLogin(NewPlayer);
 
-	Players.Add(NewPlayer);
+	PlayerStates.Add(NewPlayer->GetPlayerState<ACUPlayerState>());
 	
 	K2_PostLogin(NewPlayer);
 	FGameModeEvents::GameModePostLoginEvent.Broadcast(this, NewPlayer);
 
 	GiveCharacterTo(NewPlayer, 2.f);
 
-	if (Players.Num() == GameSettings.PlayerNum)
+	if (PlayerStates.Num() == GameSettings.PlayerNum)
 		ChangeMatchState(EMatchState::PreStart);
 }
 
@@ -71,8 +71,8 @@ void ACUGameMode::InitCharactersPool()
 
 void ACUGameMode::RestartAllPlayers()
 {
-	for (auto Player : Players)
-		RestartPlayer(Player);
+	for (auto PlayerState : PlayerStates)
+		RestartPlayer(PlayerState->GetOwner<AController>());
 }
 
 void ACUGameMode::RestartPlayer(AController* NewPlayer)
@@ -91,9 +91,9 @@ void ACUGameMode::RestartPlayer(AController* NewPlayer)
 		if (FreePawn == nullptr)
 			return;
 		
-		FreePawn->OnActivated();
-		
 		SetupPlayer(NewPlayer, FreePawn, StartSpot->GetTransform());
+
+		FreePawn->OnActivated();
 	}
 	else
 	{
@@ -121,6 +121,44 @@ void ACUGameMode::SetupPlayer(AController* Controller, APawn* Pawn, const FTrans
 	K2_OnRestartPlayer(Controller);
 }
 
+void ACUGameMode::GiveOutRoles()
+{
+	for (auto PlayerState : PlayerStates)
+		PlayerState->ChangeRole(EGameRole::Indefined);
+
+	SelectCatchers();
+	SelectRunners();
+}
+
+void ACUGameMode::SelectCatchers()
+{
+	if (GameSettings.CatcherNum == 0)
+	{
+		// log
+		return;
+	}
+	
+	int32 SelectedCathersCount = 0;
+
+	while (SelectedCathersCount < GameSettings.CatcherNum)
+	{
+		auto SelectedPlayer = PlayerStates[FMath::RandRange(0, PlayerStates.Num() - 1)];
+		
+		if (SelectedPlayer && SelectedPlayer->IsCatchcer() == false)
+		{
+			SelectedPlayer->ChangeRole(EGameRole::Catcher);
+			SelectedCathersCount++;
+		}
+	}	
+}
+
+void ACUGameMode::SelectRunners()
+{
+	for (auto PlayerState : PlayerStates)
+		if (PlayerState->IsCatchcer() == false)
+			PlayerState->ChangeRole(EGameRole::Runner);
+}
+
 void ACUGameMode::GiveCharacterTo(AController* Player, const float& Delay)
 {
 	const FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ACUGameMode::RestartPlayer, Cast<AController>(Player));
@@ -134,18 +172,34 @@ void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 	{
 	case EMatchState::PreStart:
 		{
-			// выдать игровые роли
-
 			FTimerHandle TimerHandle;
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this] { ChangeMatchState(EMatchState::Start); }, 3.f, false);
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this] { ChangeMatchState(EMatchState::Start); }, 5.f, false);
 		}
 		break;
 
 	case EMatchState::Start:
-		{			
+		{
+			GiveOutRoles();
 			RestartAllPlayers();
 
 			GetWorld()->GetTimerManager().SetTimer(StartMatchTimerHandle, this, &ACUGameMode::TickStartMatch, 1.f, true);
+
+			CurrentMatchTime = GameSettings.MatchTime - 1;
+		}
+		break;
+
+	case EMatchState::InProgress:
+		{
+			GetWorld()->GetTimerManager().SetTimer(MatchTimerHandle, [this]()
+			{
+				GetGameState<ACUGameState>()->OnMatchTimeChanged(CurrentMatchTime);
+				CurrentMatchTime--;
+				
+				if (CurrentMatchTime == 0)
+					GetWorld()->GetTimerManager().ClearTimer(MatchTimerHandle);
+			},
+			1.f,
+			true);
 		}
 		break;
 	}
@@ -159,7 +213,7 @@ void ACUGameMode::TickStartMatch()
 	
 	if (CurrentStartTick == 0)
 		CurrentStartTick = GameSettings.StartMatchTicks;
-
+	
 	if (CurrentStartTick > 0)
 	{
 		GetGameState<ACUGameState>()->OnStartMatchTicked(CurrentStartTick);

@@ -39,6 +39,8 @@ void ACUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+
 	InputComponent->BindAxis("MoveForward", this, &ACUCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ACUCharacter::MoveRight);
 }

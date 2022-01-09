@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CUPlayerController.h"
+#include "CUCharacter.h"
 #include "CUGameState.h"
 #include "CUHUD.h"
 #include "CUPlayerState.h"
@@ -43,12 +44,17 @@ void ACUPlayerController::OnRep_Pawn()
 {
 	Super::OnRep_Pawn();
 
-	if (GetPawn() != nullptr && GetWorld()->GetGameState<ACUGameState>())
-		HandleMatchState(GetWorld()->GetGameState<ACUGameState>()->GetGameState());
+	if (GetPawn() != nullptr)
+	{
+		if (GetWorld()->GetGameState<ACUGameState>())
+			HandleMatchState(GetWorld()->GetGameState<ACUGameState>()->GetGameState());
+		
+		CUHUD->OnNewCharacter(GetPawn<ACUCharacter>());	
+	}
 }
 
 void ACUPlayerController::HandleMatchState(const EMatchState& NewState)
-{
+{	
 	if (NewState == EMatchState::Start)
 	{
 		if (GetPawn())
