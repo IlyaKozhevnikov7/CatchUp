@@ -8,11 +8,6 @@
 
 DEFINE_LOG_CATEGORY_STATIC(CULogPlayerController, All, All);
 
-ACUPlayerController::ACUPlayerController()
-{
-	
-}
-
 void ACUPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -77,11 +72,6 @@ void ACUPlayerController::HandleMatchState(const EMatchState& NewState)
 		if (GetPawn())
 			GetPawn()->DisableInput(this);
 	}
-}
-
-void ACUPlayerController::Pause()
-{
-	Super::Pause();
 }
 
 void ACUPlayerController::ChangeGameRole(const EGameRole& NewRole)

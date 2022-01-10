@@ -16,5 +16,9 @@ private:
 
 	UPROPERTY(EditInstanceOnly)
 	EGameRole ForRole;
+
+public:
+
+	const EGameRole& GetRole() const { return ForRole; }
 	
 };

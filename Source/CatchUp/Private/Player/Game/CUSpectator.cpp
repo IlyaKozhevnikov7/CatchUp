@@ -6,5 +6,3 @@ ACUSpectator::ACUSpectator()
 {
 	bAddDefaultMovementBindings = false;
 }
-
-

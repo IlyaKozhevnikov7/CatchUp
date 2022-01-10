@@ -61,7 +61,7 @@ private:
 	void OnMatchStateChanged(const EMatchState& NewState);
 	
 	void OnMatchTimeChanged(const int32& NewTime);
-
+	
 	void ActivateRoleWidget(const EGameRole& GameRole);
 
 	void ActivateAdditionalWidget(const EAdditionWidget& Type);

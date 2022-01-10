@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "CatchUpTypes.h"
+#include "CUPlayerStart.h"
+#include "EngineUtils.h"
 #include "GameFramework/GameModeBase.h"
 #include "CUGameMode.generated.h"
 
+class APlayerStart;
 class ACUCharacter;
 class ACUPlayerState;
 
@@ -48,7 +51,7 @@ private:
 	virtual bool AllowPausing(APlayerController* PC) override;
 	
 	virtual bool SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate) override;
-
+	
 	virtual bool ClearPause() override;
 	
 	void InitCharactersPool();
@@ -70,4 +73,6 @@ private:
 	void ChangeMatchState(const EMatchState& NewState);
 
 	void TickStartMatch();
+
+	AActor* FindPlayerStartByRole(const EGameRole& GameRole) const;
 };

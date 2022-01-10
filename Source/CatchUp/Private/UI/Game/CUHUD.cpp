@@ -43,7 +43,7 @@ void ACUHUD::OnNewCharacter(ACUCharacter* Character)
 }
 
 void ACUHUD::OnGameRoleChanged(const EGameRole& NewRole)
- {
+{
 	ActivateRoleWidget(NewRole);
 }
 
@@ -55,6 +55,13 @@ void ACUHUD::OnMatchStateChanged(const EMatchState& NewState)
 		{
 			ActivateAdditionalWidget(EAdditionWidget::Timer);
 		}
+		break;
+
+	case EMatchState::Paused:
+		{
+			DeactivateAdditionalWidget(EAdditionWidget::Timer);
+		}
+		break;
 	}
 }
 
@@ -67,7 +74,7 @@ void ACUHUD::ActivateRoleWidget(const EGameRole& GameRole)
 {
 	if (ensureMsgf(RoleWidgets.Contains(GameRole), TEXT("Key [%s] is not exist in RoleWodgets"), *UEnum::GetValueAsString(GameRole)))
 	{
- 		if (ensureMsgf(CurrentRoleWidget == RoleWidgets[GameRole] || CurrentRoleWidget == nullptr, TEXT("CurrentRoleWidget is already %s widget"), *UEnum::GetValueAsString(GameRole)))
+ 		if (CurrentRoleWidget == RoleWidgets[GameRole])
 			return;
 		
 		if (CurrentRoleWidget != nullptr)

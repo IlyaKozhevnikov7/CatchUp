@@ -32,18 +32,6 @@ void ACUGameMode::PostLogin(APlayerController* NewPlayer)
 	
 	NewPlayer->ClientCapBandwidth(NewPlayer->Player->CurrentNetSpeed);
 
-	if (MustSpectate(NewPlayer))
-	{
-		NewPlayer->ClientGotoState(NAME_Spectating);
-	}
-	else
-	{
-		const FUniqueNetIdRepl& NewPlayerStateUniqueId = NewPlayer->PlayerState->GetUniqueId();
-		
-		if (NewPlayerStateUniqueId.IsValid())
-			GetGameInstance()->AddUserToReplay(NewPlayerStateUniqueId.ToString());
-	}
-
 	if (GameSession)
 		GameSession->PostLogin(NewPlayer);
 
@@ -72,6 +60,7 @@ bool ACUGameMode::SetPause(APlayerController* PC, FCanUnpause CanUnpauseDelegate
 		PreviousState = GetGameState<ACUGameState>()->GetGameState();
 		ChangeMatchState(EMatchState::Paused);
 
+		// без ForceNetUpdate MatchState не реплицируется 
 		GameState->ForceNetUpdate();
 	}
 	
@@ -89,7 +78,7 @@ bool ACUGameMode::ClearPause()
 }
 
 void ACUGameMode::InitCharactersPool()
-{
+{	
 	for (int32 Index = 0; Index < GameSettings.PlayerNum; Index++)
 	{
 		const auto NewCharacter = GetWorld()->SpawnActor<ACUCharacter>(DefaultPawnClass);
@@ -107,7 +96,7 @@ void ACUGameMode::RestartAllPlayers()
 
 void ACUGameMode::RestartPlayer(AController* NewPlayer)
 {
-	const auto StartSpot = FindPlayerStart(NewPlayer);
+	const auto StartSpot = FindPlayerStartByRole(NewPlayer->GetPlayerState<ACUPlayerState>()->GetGameRole());
 
 	if (StartSpot == nullptr)
 		return;
@@ -268,4 +257,21 @@ void ACUGameMode::TickStartMatch()
 	}
 }
 
+AActor* ACUGameMode::FindPlayerStartByRole(const EGameRole& GameRole) const
+{
+	TArray<ACUPlayerStart*> RightStarts;	
+	
+	for (auto Start : TActorRange<ACUPlayerStart>(GetWorld()))
+	{
+		if (GameRole == EGameRole::Indefined)
+		{
+			RightStarts.Add(Start);
+			continue;
+		}
+		
+		if (Start->GetRole() == GameRole)
+			RightStarts.Add(Start);
+	}
 
+	return RightStarts[FMath::RandRange(0, RightStarts.Num() - 1)];
+}

@@ -32,6 +32,8 @@ protected:
 public:
 
 	void ChangeRole(const EGameRole& NewRole);
+
+	FORCEINLINE const EGameRole& GetGameRole() const { return GameRole; }
 	
 	bool IsCatchcer() const;
 
