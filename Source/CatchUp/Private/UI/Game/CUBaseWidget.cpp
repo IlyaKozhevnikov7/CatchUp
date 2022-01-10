@@ -4,14 +4,20 @@
 
 void UCUBaseWidget::Activate()
 {
-	SetVisibility(ESlateVisibility::HitTestInvisible);
+	if (ActivationAnim != nullptr)
+		PlayAnimation(ActivationAnim);
+	else
+		SetVisibility(ESlateVisibility::HitTestInvisible);
 	
 	bIsActive = true;
 }
 
 void UCUBaseWidget::Deactivate()
 {
-	SetVisibility(ESlateVisibility::Collapsed);
+	if (DeactivationAnim != nullptr)
+		PlayAnimation(DeactivationAnim);
+	else
+		SetVisibility(ESlateVisibility::Collapsed);
 
 	bIsActive = false;
 }

@@ -13,16 +13,22 @@ class CATCHUP_API UCUBaseWidget : public UUserWidget
 
 private:
 
-	// добавить анимации активации и деактивации 
+	UPROPERTY(Transient, meta = (BindWidgetAnimOptional))	
+	UWidgetAnimation* ActivationAnim;
 
+	UPROPERTY(Transient, meta = (BindWidgetAnimOptional))	
+	UWidgetAnimation* DeactivationAnim;
+	
 	bool bIsActive;
 	
 public:
 
 	FORCEINLINE bool GetIsActive() const { return bIsActive; }
-	
-	void Activate();
 
-	void Deactivate();
+	UFUNCTION()
+	virtual void Activate();
+
+	UFUNCTION()
+	virtual void Deactivate();
 	
 };

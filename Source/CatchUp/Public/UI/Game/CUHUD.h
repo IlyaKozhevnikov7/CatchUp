@@ -61,6 +61,8 @@ private:
 	void OnMatchStateChanged(const EMatchState& NewState);
 	
 	void OnMatchTimeChanged(const int32& NewTime);
+
+	void OnStartMatchTicked(const int32& Tick);
 	
 	void ActivateRoleWidget(const EGameRole& GameRole);
 
@@ -80,6 +82,4 @@ private:
 		To.Add(Key, NewWidget);
 	}
 };
-
-
 

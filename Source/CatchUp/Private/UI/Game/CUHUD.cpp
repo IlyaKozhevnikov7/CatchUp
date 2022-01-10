@@ -5,6 +5,7 @@
 #include "CUGameState.h"
 #include "CUPlayerController.h"
 #include "CUPlayerState.h"
+#include "CUStartTimerWidget.h"
 #include "CUTimerWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(CULogHUD, All, All);
@@ -23,6 +24,7 @@ void ACUHUD::BeginPlay()
 	check(GameState);
 
 	GameState->MatchStateChangedEvent.AddUObject(this, &ACUHUD::OnMatchStateChanged);
+	GameState->StartMatchTickedEvent.AddUObject(this, &ACUHUD::OnStartMatchTicked);
 	GameState->MatchTimeChangedEvent.AddUObject(this, &ACUHUD::OnMatchTimeChanged);
 }
 
@@ -51,23 +53,42 @@ void ACUHUD::OnMatchStateChanged(const EMatchState& NewState)
 {
 	switch (NewState)
 	{
+	case EMatchState::Start:
+		{
+			ActivateAdditionalWidget(EAdditionWidget::StartTime);
+		}
+		break;
+		
 	case EMatchState::InProgress:
 		{
-			ActivateAdditionalWidget(EAdditionWidget::Timer);
+			DeactivateAdditionalWidget(EAdditionWidget::StartTime);
+			ActivateAdditionalWidget(EAdditionWidget::GameTimer);
 		}
 		break;
 
 	case EMatchState::Paused:
 		{
-			DeactivateAdditionalWidget(EAdditionWidget::Timer);
+			DeactivateAdditionalWidget(EAdditionWidget::GameTimer);
 		}
 		break;
+
+	case EMatchState::Ended:
+		{
+			ActivateAdditionalWidget(EAdditionWidget::End);
+		}
+		break;
+		
 	}
 }
 
 void ACUHUD::OnMatchTimeChanged(const int32& NewTime)
 {
-	Cast<UCUTimerWidget>(AdditionalWidgets[EAdditionWidget::Timer])->UpdateTimer(NewTime);
+	Cast<UCUTimerWidget>(AdditionalWidgets[EAdditionWidget::GameTimer])->UpdateTimer(NewTime);
+}
+
+void ACUHUD::OnStartMatchTicked(const int32& Tick)
+{
+	Cast<UCUStartTimerWidget>(AdditionalWidgets[EAdditionWidget::StartTime])->UpdateTimer(Tick);
 }
 
 void ACUHUD::ActivateRoleWidget(const EGameRole& GameRole)

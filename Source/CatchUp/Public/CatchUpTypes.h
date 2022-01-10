@@ -29,7 +29,7 @@ public:
 	int32 CatcherNum = 1;
 
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
-	int32 StartMatchTicks = 3;
+	int32 StartMatchTicks = 5;
 
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0", ClampMax = "300"))
 	int32 MatchTime = 120;
@@ -51,5 +51,8 @@ enum class EGameRole : uint8
 UENUM()
 enum class EAdditionWidget : uint8
 {
-	Timer = 0
+	GameTimer = 0,
+	StartTime,
+	Pause,
+	End
 };

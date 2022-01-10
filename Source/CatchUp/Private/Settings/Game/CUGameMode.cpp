@@ -207,7 +207,8 @@ void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 			GiveOutRoles();
 			RestartAllPlayers();
 
-			GetWorld()->GetTimerManager().SetTimer(StartMatchTimerHandle, this, &ACUGameMode::TickStartMatch, 1.f, true);
+			CurrentStartTick = GameSettings.StartMatchTicks;
+			GetWorld()->GetTimerManager().SetTimer(StartMatchTimerHandle, this, &ACUGameMode::TickStartMatch, 1.f, true, 0.f);
 
 			CurrentMatchTime = GameSettings.MatchTime - 1;
 		}
@@ -225,11 +226,15 @@ void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 				GetGameState<ACUGameState>()->OnMatchTimeChanged(CurrentMatchTime);
 				CurrentMatchTime--;
 				
-				if (CurrentMatchTime == 0)
+				if (CurrentMatchTime == -1)
+				{
 					GetWorld()->GetTimerManager().ClearTimer(MatchTimerHandle);
+					ChangeMatchState(EMatchState::Ended);
+				}
 			},
 			1.f,
-			true);
+			true,
+			0.f);
 		}
 		break;
 	}
@@ -239,21 +244,17 @@ void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 
 void ACUGameMode::TickStartMatch()
 {
-	static int32 CurrentStartTick;
-	
 	if (CurrentStartTick == 0)
-		CurrentStartTick = GameSettings.StartMatchTicks;
+	{
+		GetWorld()->GetTimerManager().ClearTimer(StartMatchTimerHandle);
+		ChangeMatchState(EMatchState::InProgress);
+		return;
+	}
 	
 	if (CurrentStartTick > 0)
 	{
 		GetGameState<ACUGameState>()->OnStartMatchTicked(CurrentStartTick);
 		CurrentStartTick--;
-
-		if (CurrentStartTick == 0)
-		{
-			GetWorld()->GetTimerManager().ClearTimer(StartMatchTimerHandle);
-			ChangeMatchState(EMatchState::InProgress);
-		}
 	}
 }
 

@@ -33,6 +33,8 @@ private:
 	
 	// temp here
 	FTimerHandle StartMatchTimerHandle;
+
+	int32 CurrentStartTick;
 	
 	int32 CurrentMatchTime;
 	

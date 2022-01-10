@@ -72,6 +72,16 @@ void ACUPlayerController::HandleMatchState(const EMatchState& NewState)
 		if (GetPawn())
 			GetPawn()->DisableInput(this);
 	}
+
+	if (NewState == EMatchState::Ended)
+	{
+		DisableInput(this);
+		SetInputMode(FInputModeUIOnly());
+		SetShowMouseCursor(true);
+		
+		if (GetPawn())
+			GetPawn()->DisableInput(this);
+	}
 }
 
 void ACUPlayerController::ChangeGameRole(const EGameRole& NewRole)
