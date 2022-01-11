@@ -22,6 +22,8 @@ void ACUGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	InitCharactersPool();
+
+	GetGameState<ACUGameState>()->ShouldRestartMatchEvent.AddUObject(this, &ACUGameMode::RestartMatch);
 }
 
 void ACUGameMode::PostLogin(APlayerController* NewPlayer)
@@ -75,6 +77,11 @@ bool ACUGameMode::ClearPause()
 		ChangeMatchState(PreviousState);
 	
 	return bResult;
+}
+
+void ACUGameMode::RestartMatch()
+{
+	ChangeMatchState(EMatchState::Start);
 }
 
 void ACUGameMode::InitCharactersPool()

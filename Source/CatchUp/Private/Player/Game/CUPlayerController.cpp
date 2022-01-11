@@ -5,14 +5,20 @@
 #include "CUGameState.h"
 #include "CUHUD.h"
 #include "CUPlayerState.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY_STATIC(CULogPlayerController, All, All);
 
 void ACUPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (HasAuthority() == false)
+	
+	if (HasAuthority())
+	{
+		CUPlayerState = GetPlayerState<ACUPlayerState>();
+		check(CUPlayerState);
+	}
+	else
 	{
 		SetShowMouseCursor(false);
 
@@ -35,6 +41,9 @@ void ACUPlayerController::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
 
+	CUPlayerState = GetPlayerState<ACUPlayerState>();
+	check(CUPlayerState);
+	
 	CUHUD = GetHUD<ACUHUD>();
 	check(CUHUD);
 
@@ -52,6 +61,12 @@ void ACUPlayerController::OnRep_Pawn()
 		
 		CUHUD->OnNewCharacter(GetPawn<ACUCharacter>());	
 	}
+}
+
+void ACUPlayerController::SetWantRestartMatch()
+{
+	if (CUPlayerState->IsWantRestartMatch() == false)
+		SetWantRestartMatchServer();
 }
 
 void ACUPlayerController::HandleMatchState(const EMatchState& NewState)
@@ -82,6 +97,18 @@ void ACUPlayerController::HandleMatchState(const EMatchState& NewState)
 		if (GetPawn())
 			GetPawn()->DisableInput(this);
 	}
+}
+
+void ACUPlayerController::SetWantRestartMatchServer_Implementation()
+{
+	GetWorld()->GetGameState<ACUGameState>()->AddWantingRestartMatch(GetPlayerState<ACUPlayerState>());
+
+	CUPlayerState->SetWantRestartMatch(true);
+}
+
+bool ACUPlayerController::SetWantRestartMatchServer_Validate()
+{
+	return CUPlayerState->IsWantRestartMatch() == false;
 }
 
 void ACUPlayerController::ChangeGameRole(const EGameRole& NewRole)

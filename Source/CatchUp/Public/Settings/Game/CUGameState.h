@@ -10,6 +10,9 @@
 DECLARE_MULTICAST_DELEGATE_OneParam(FMatchStateChanged, const EMatchState&);
 DECLARE_MULTICAST_DELEGATE_OneParam(FStartMatchTicked, const int32&);
 DECLARE_MULTICAST_DELEGATE_OneParam(FMatchTimeChanged, const int32&);
+DECLARE_MULTICAST_DELEGATE(FShouldRestartMatch);
+
+class ACUPlayerState;
 
 UCLASS()
 class CATCHUP_API ACUGameState : public AGameStateBase
@@ -23,12 +26,17 @@ public:
 	FStartMatchTicked StartMatchTickedEvent;
 
 	FMatchTimeChanged MatchTimeChangedEvent;
+
+	FShouldRestartMatch ShouldRestartMatchEvent;
 	
 private:
 
 	UPROPERTY(ReplicatedUsing = "OnRep_MatchState")
 	EMatchState MatchState;
 
+	UPROPERTY()
+	TArray<const ACUPlayerState*> WantingRestartMatch;
+	
 protected:
 	
 	ACUGameState();
@@ -47,6 +55,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void OnMatchTimeChanged(const int32& NewTime);
 	
+	void AddWantingRestartMatch(const ACUPlayerState* Wanting);
+
 private:
 
 	UFUNCTION()

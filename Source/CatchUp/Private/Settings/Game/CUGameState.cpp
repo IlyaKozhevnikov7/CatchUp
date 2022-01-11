@@ -40,6 +40,21 @@ void ACUGameState::OnMatchTimeChanged_Implementation(const int32& NewTime)
 		MatchTimeChangedEvent.Broadcast(NewTime);
 }
 
+void ACUGameState::AddWantingRestartMatch(const ACUPlayerState* Wanting)
+{
+	check(HasAuthority());
+
+	WantingRestartMatch.Add(Wanting);
+
+	// сейчас что бы перезапустить матч должны согласится все игроки
+
+	if (WantingRestartMatch.Num() == PlayerArray.Num())
+	{
+		ShouldRestartMatchEvent.Broadcast();
+		UE_LOG(CULogGameState, Display, TEXT("ShouldRestartMatchEvent"));
+	}
+}
+
 void ACUGameState::OnRep_MatchState()
 {
 	MatchStateChangedEvent.Broadcast(MatchState);

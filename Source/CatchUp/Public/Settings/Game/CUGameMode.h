@@ -56,6 +56,8 @@ private:
 	
 	virtual bool ClearPause() override;
 	
+	void RestartMatch();
+	
 	void InitCharactersPool();
 
 	void RestartAllPlayers();

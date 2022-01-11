@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "CUPlayerController.generated.h"
 
+class ACUPlayerState;
 class ACUHUD;
 
 UCLASS()
@@ -17,19 +18,30 @@ class CATCHUP_API ACUPlayerController : public APlayerController
 private:
 
 	UPROPERTY()
+	ACUPlayerState* CUPlayerState;
+
+	UPROPERTY()
 	ACUHUD* CUHUD;
+	
+public:
+
+	UFUNCTION()
+	void SetWantRestartMatch();
 	
 private:
 
 	virtual void BeginPlay() override;
-
+	
 	virtual void SetupInputComponent() override;
 
 	virtual void OnRep_PlayerState() override;
 	
 	virtual void OnRep_Pawn() override;
-
+	
 	void HandleMatchState(const EMatchState& NewState);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void SetWantRestartMatchServer();
 	
 #if WITH_EDITOR
 	

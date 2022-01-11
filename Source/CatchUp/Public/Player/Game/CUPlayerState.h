@@ -22,6 +22,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = "OnRep_GameRole")
 	EGameRole GameRole;
+
+	UPROPERTY(ReplicatedUsing = "QWERTY")
+	bool bWantRestartMatch; // данное поля может быть нигде и не понадобится
 	
 protected:
 	
@@ -29,11 +32,18 @@ protected:
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION()
+	void QWERTY(); // TODO temp
+	
 public:
 
-	void ChangeRole(const EGameRole& NewRole);
-
 	FORCEINLINE const EGameRole& GetGameRole() const { return GameRole; }
+
+	FORCEINLINE bool IsWantRestartMatch() const { return bWantRestartMatch; }
+
+	void SetWantRestartMatch(const bool& bNewWantRestartMatch);
+	
+	void ChangeRole(const EGameRole& NewRole);
 	
 	bool IsCatchcer() const;
 

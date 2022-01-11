@@ -3,10 +3,12 @@
 #include "CUHUD.h"
 #include "CUBaseWidget.h"
 #include "CUGameState.h"
+#include "CUMatchEndWidget.h"
 #include "CUPlayerController.h"
 #include "CUPlayerState.h"
 #include "CUStartTimerWidget.h"
 #include "CUTimerWidget.h"
+#include "Components/Button.h"
 
 DEFINE_LOG_CATEGORY_STATIC(CULogHUD, All, All);
 
@@ -26,12 +28,17 @@ void ACUHUD::BeginPlay()
 	GameState->MatchStateChangedEvent.AddUObject(this, &ACUHUD::OnMatchStateChanged);
 	GameState->StartMatchTickedEvent.AddUObject(this, &ACUHUD::OnStartMatchTicked);
 	GameState->MatchTimeChangedEvent.AddUObject(this, &ACUHUD::OnMatchTimeChanged);
+
+	UE_LOG(CULogHUD, Display, TEXT("BeginPlay"));
 }
 
 void ACUHUD::Init(ACUPlayerController* Controller)
 {
 	// бинды к PlayerController
 
+	// fix widget null
+	// Cast<UCUMatchEndWidget>(AdditionalWidgets[EAdditionWidget::End])->GetRestartButtonClickEvent().AddDynamic(Controller, &ACUPlayerController::SetWantRestartMatch);
+	
 	// бинды к PlayerState
 	const auto PlayerState = Controller->GetPlayerState<ACUPlayerState>();
 	check(PlayerState);
@@ -110,7 +117,8 @@ void ACUHUD::ActivateAdditionalWidget(const EAdditionWidget& Type)
 {
 	if (ensureMsgf(AdditionalWidgets.Contains(Type), TEXT("Key [%s] is not exist in AdditionalWodgets"), *UEnum::GetValueAsString(Type)))
 	{
-		if (ensureMsgf(AdditionalWidgets[Type]->GetIsActive() == false, TEXT("Widget %s is already active"), *AdditionalWidgets[Type]->GetName()))
+		// if (ensureMsgf(AdditionalWidgets[Type]->GetIsActive() == false, TEXT("Widget %s is already active"), *AdditionalWidgets[Type]->GetName()))
+		if (AdditionalWidgets[Type]->GetIsActive() == false)
 		{
 			AdditionalWidgets[Type]->Activate();
 		}
@@ -121,7 +129,8 @@ void ACUHUD::DeactivateAdditionalWidget(const EAdditionWidget& Type)
 {
 	if (ensureMsgf(AdditionalWidgets.Contains(Type), TEXT("Key [%s] is not exist in AdditionalWodgets"), *UEnum::GetValueAsString(Type)))
 	{
-		if (ensureMsgf(AdditionalWidgets[Type]->GetIsActive(), TEXT("Widget %s is already deactivate"), *AdditionalWidgets[Type]->GetName()))
+		// if (ensureMsgf(AdditionalWidgets[Type]->GetIsActive(), TEXT("Widget %s is already deactivate"), *AdditionalWidgets[Type]->GetName()))
+		if (AdditionalWidgets[Type]->GetIsActive())
 		{
 			AdditionalWidgets[Type]->Deactivate();
 		}
