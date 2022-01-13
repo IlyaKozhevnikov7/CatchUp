@@ -22,6 +22,8 @@ private:
 
 	UPROPERTY()
 	ACUHUD* CUHUD;
+
+	EInputMode InputMode;
 	
 public:
 
@@ -42,6 +44,8 @@ private:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void SetWantRestartMatchServer();
+
+	void SwitchInputMode(const EInputMode& Mode);
 	
 #if WITH_EDITOR
 	

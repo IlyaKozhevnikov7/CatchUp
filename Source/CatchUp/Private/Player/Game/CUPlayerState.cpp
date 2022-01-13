@@ -17,12 +17,7 @@ void ACUPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACUPlayerState, GameRole);
-	DOREPLIFETIME(ACUPlayerState, bWantRestartMatch); // add condition
-}
-
-void ACUPlayerState::QWERTY()
-{
-	UE_LOG(CULogPlayerState, Display, TEXT("bWantRestartMatch replicated"));
+	DOREPLIFETIME_CONDITION(ACUPlayerState, bWantRestartMatch, COND_OwnerOnly);
 }
 
 void ACUPlayerState::SetWantRestartMatch(const bool& bNewWantRestartMatch)

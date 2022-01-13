@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "CatchUpTypes.h"
-#include "CUPlayerStart.h"
 #include "EngineUtils.h"
 #include "GameFramework/GameModeBase.h"
 #include "CUGameMode.generated.h"
@@ -71,8 +70,6 @@ private:
 	void SelectCatchers();
 
 	void SelectRunners();
-	
-	void GiveCharacterTo(AController* Playerm, const float& Delay);
 
 	void ChangeMatchState(const EMatchState& NewState);
 

@@ -20,7 +20,8 @@ void ACUPlayerController::BeginPlay()
 	}
 	else
 	{
-		SetShowMouseCursor(false);
+		InputMode = EInputMode::UI;
+		SwitchInputMode(EInputMode::Game);
 
 		// пока хз как отключить прием инпутов со стороны сервера
 		GetWorld()->GetGameState<ACUGameState>()->MatchStateChangedEvent.AddUObject(this, &ACUPlayerController::HandleMatchState);
@@ -73,26 +74,30 @@ void ACUPlayerController::HandleMatchState(const EMatchState& NewState)
 {	
 	if (NewState == EMatchState::Start)
 	{
+		SwitchInputMode(EInputMode::Game);
+		
 		if (GetPawn())
 			GetPawn()->DisableInput(this);
 	}
 	else if (NewState == EMatchState::InProgress)
 	{
+		SwitchInputMode(EInputMode::Game);
+		
 		if (GetPawn())
 			GetPawn()->EnableInput(this);
 	}
 
 	if (NewState == EMatchState::Paused)
 	{
+		SwitchInputMode(EInputMode::Game);
+		
 		if (GetPawn())
 			GetPawn()->DisableInput(this);
 	}
 
 	if (NewState == EMatchState::Ended)
 	{
-		DisableInput(this);
-		SetInputMode(FInputModeUIOnly());
-		SetShowMouseCursor(true);
+		SwitchInputMode(EInputMode::UI);
 		
 		if (GetPawn())
 			GetPawn()->DisableInput(this);
@@ -109,6 +114,28 @@ void ACUPlayerController::SetWantRestartMatchServer_Implementation()
 bool ACUPlayerController::SetWantRestartMatchServer_Validate()
 {
 	return CUPlayerState->IsWantRestartMatch() == false;
+}
+
+void ACUPlayerController::SwitchInputMode(const EInputMode& Mode)
+{
+	if (InputMode == Mode)
+		return;
+	
+	if (Mode == EInputMode::Game)
+	{
+		SetShowMouseCursor(false);
+		SetInputMode(FInputModeGameOnly());
+	}
+	else
+	{
+		if (GetPawn())
+			GetPawn()->DisableInput(this); // иниче павн запомнит последний инпут и продолжит его обробатывать
+		
+		SetShowMouseCursor(true);
+		SetInputMode(FInputModeUIOnly());
+	}
+
+	InputMode = Mode;
 }
 
 void ACUPlayerController::ChangeGameRole(const EGameRole& NewRole)

@@ -42,13 +42,15 @@ protected:
 	ACUGameState();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
+	
 public:
 	
 	FORCEINLINE const EMatchState& GetGameState() const { return MatchState; }
 	
 	void ChangeMatchState(const EMatchState& NewState);
 
+	void OnMatchRestarted();
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void OnStartMatchTicked(const int32& Time);
 

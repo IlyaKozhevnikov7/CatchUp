@@ -23,17 +23,14 @@ private:
 	UPROPERTY(ReplicatedUsing = "OnRep_GameRole")
 	EGameRole GameRole;
 
-	UPROPERTY(ReplicatedUsing = "QWERTY")
-	bool bWantRestartMatch; // данное поля может быть нигде и не понадобится
+	UPROPERTY(Replicated)
+	bool bWantRestartMatch;
 	
 protected:
 	
 	ACUPlayerState();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	UFUNCTION()
-	void QWERTY(); // TODO temp
 	
 public:
 

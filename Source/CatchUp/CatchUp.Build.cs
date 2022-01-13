@@ -23,7 +23,5 @@ public class CatchUp : ModuleRules
 			"CatchUp/Public/Items/Game/",
 			"CatchUp/Public/UI/Game/"
 		});
-
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
 	}
 }

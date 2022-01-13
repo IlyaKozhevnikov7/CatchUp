@@ -24,13 +24,7 @@ private:
 	FWidgetAnimationDynamicEvent TickAnimFinishedCallBack;
 	
 public:
-
-	void Deactivate() override;
 	
 	void UpdateTimer(const int32& Time);
-
-private:
-
-	virtual void NativeOnInitialized() override;
 	
 };

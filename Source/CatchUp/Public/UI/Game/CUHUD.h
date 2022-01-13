@@ -55,6 +55,8 @@ public:
 	void OnNewCharacter(ACUCharacter* Character);
 
 private:
+
+	void InitWidgets();
 	
 	void OnGameRoleChanged(const EGameRole& NewRole);
 
@@ -65,10 +67,32 @@ private:
 	void OnStartMatchTicked(const int32& Tick);
 	
 	void ActivateRoleWidget(const EGameRole& GameRole);
+	
+	void ActivateAdditionalWidget(const EAdditionWidget& Type) const;
+	
+	void DeactivateAllAdditionalWidgets() const;
+	
+	void ActivateAdditionalWidgetsOnly(const TArray<EAdditionWidget>& WidgetTypes)
+	{
+		for (auto Widget : AdditionalWidgets)
+		{
+			bool bIsRightWidget = false;
+		
+			for (auto Type : WidgetTypes)
+			{
+				if (Widget.Key != Type)
+					continue;
 
-	void ActivateAdditionalWidget(const EAdditionWidget& Type);
+				bIsRightWidget = true;
+			
+				if (Widget.Value->IsActive() == false)
+					Widget.Value->Activate();			
+			}
 
-	void DeactivateAdditionalWidget(const EAdditionWidget& Type);
+			if (bIsRightWidget == false)
+				Widget.Value->Deactivate();
+		}
+	}
 	
 	template<typename K>
 	void AddWidgetTo(const TSubclassOf<UCUBaseWidget>& WidgetClass, const K& Key, TMap<K, UCUBaseWidget*>& To)
@@ -82,4 +106,3 @@ private:
 		To.Add(Key, NewWidget);
 	}
 };
-

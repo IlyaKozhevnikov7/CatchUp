@@ -52,7 +52,16 @@ UENUM()
 enum class EAdditionWidget : uint8
 {
 	GameTimer = 0,
-	StartTime,
+	StartTimer,
 	Pause,
 	End
+};
+
+// Controller
+
+UENUM()
+enum class EInputMode : uint8
+{
+	Game = 0,
+	UI
 };

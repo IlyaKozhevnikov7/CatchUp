@@ -5,7 +5,9 @@
 #include "CUGameState.h"
 #include "CUHUD.h"
 #include "CUPlayerController.h"
+#include "CUPlayerStart.h"
 #include "CUPlayerState.h"
+#include "CatchUp/CatchUpMacros.h"
 #include "GameFramework/GameSession.h"
 
 ACUGameMode::ACUGameMode()
@@ -42,8 +44,8 @@ void ACUGameMode::PostLogin(APlayerController* NewPlayer)
 	K2_PostLogin(NewPlayer);
 	FGameModeEvents::GameModePostLoginEvent.Broadcast(this, NewPlayer);
 
-	GiveCharacterTo(NewPlayer, 2.f);
-
+	DELAY_WITH_PARAMS(this, &ACUGameMode::RestartPlayer, 2.f, Cast<AController>(NewPlayer));
+	
 	if (PlayerStates.Num() == GameSettings.PlayerNum)
 		ChangeMatchState(EMatchState::PreStart);
 }
@@ -82,6 +84,7 @@ bool ACUGameMode::ClearPause()
 void ACUGameMode::RestartMatch()
 {
 	ChangeMatchState(EMatchState::Start);
+	GetGameState<ACUGameState>()->OnMatchRestarted();
 }
 
 void ACUGameMode::InitCharactersPool()
@@ -160,7 +163,7 @@ void ACUGameMode::SelectCatchers()
 {
 	if (GameSettings.CatcherNum == 0)
 	{
-		// log
+		UE_LOG(LogGameMode, Warning, TEXT("CatcherNum equals zero"));
 		return;
 	}
 	
@@ -185,21 +188,18 @@ void ACUGameMode::SelectRunners()
 			PlayerState->ChangeRole(EGameRole::Runner);
 }
 
-void ACUGameMode::GiveCharacterTo(AController* Player, const float& Delay)
-{
-	const FTimerDelegate Delegate = FTimerDelegate::CreateUObject(this, &ACUGameMode::RestartPlayer, Cast<AController>(Player));
-	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, Delegate, Delay, false);
-}
-
 void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 {
+#define BREAK_IF_TIMER_ACTIVE(TimerHandle)							\
+	if (GetWorldTimerManager().IsTimerActive(TimerHandle))	\
+		break;														\
+
 	switch (NewState)
 	{
 	case EMatchState::PreStart:
 		{
 			FTimerHandle TimerHandle;
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this] { ChangeMatchState(EMatchState::Start); }, 5.f, false);
+			GetWorldTimerManager().SetTimer(TimerHandle, [this] { ChangeMatchState(EMatchState::Start); }, 5.f, false);
 		}
 		break;
 
@@ -208,14 +208,13 @@ void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 			// при переходе в Start, таймер, если он был запущен, должен продожить с места отанова
 			// тк в случае паузы таймеры тоже останавливаются
 			// тоже самое и с таймерами в других состояниях
-			if (GetWorld()->GetTimerManager().IsTimerActive(StartMatchTimerHandle))
-				break;
+			BREAK_IF_TIMER_ACTIVE(StartMatchTimerHandle);
 			
 			GiveOutRoles();
 			RestartAllPlayers();
 
 			CurrentStartTick = GameSettings.StartMatchTicks;
-			GetWorld()->GetTimerManager().SetTimer(StartMatchTimerHandle, this, &ACUGameMode::TickStartMatch, 1.f, true, 0.f);
+			GetWorldTimerManager().SetTimer(StartMatchTimerHandle, this, &ACUGameMode::TickStartMatch, 1.f, true, 0.f);
 
 			CurrentMatchTime = GameSettings.MatchTime - 1;
 		}
@@ -225,8 +224,7 @@ void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 		{
 			static FTimerHandle MatchTimerHandle;
 
-			if (GetWorld()->GetTimerManager().IsTimerActive(MatchTimerHandle))
-				break;
+			BREAK_IF_TIMER_ACTIVE(MatchTimerHandle);
 			
 			GetWorld()->GetTimerManager().SetTimer(MatchTimerHandle, [this]()
 			{

@@ -23,7 +23,7 @@ private:
 	
 public:
 
-	FORCEINLINE bool GetIsActive() const { return bIsActive; }
+	FORCEINLINE bool IsActive() const { return bIsActive; }
 
 	UFUNCTION()
 	virtual void Activate();

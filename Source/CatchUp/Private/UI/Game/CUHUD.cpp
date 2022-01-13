@@ -15,12 +15,6 @@ DEFINE_LOG_CATEGORY_STATIC(CULogHUD, All, All);
 void ACUHUD::BeginPlay()
 {
 	Super::BeginPlay();
-
-	for (auto Class : RoleWidgetClasses)
-		AddWidgetTo(Class.Value, Class.Key, RoleWidgets);
-
-	for (auto Class : AdditionalWidgetClasses)
-		AddWidgetTo(Class.Value, Class.Key, AdditionalWidgets);
 	
 	auto GameState = GetWorld()->GetGameState<ACUGameState>();
 	check(GameState);
@@ -34,16 +28,26 @@ void ACUHUD::BeginPlay()
 
 void ACUHUD::Init(ACUPlayerController* Controller)
 {
+	InitWidgets();
+	
 	// бинды к PlayerController
 
-	// fix widget null
-	// Cast<UCUMatchEndWidget>(AdditionalWidgets[EAdditionWidget::End])->GetRestartButtonClickEvent().AddDynamic(Controller, &ACUPlayerController::SetWantRestartMatch);
+	Cast<UCUMatchEndWidget>(AdditionalWidgets[EAdditionWidget::End])->GetRestartButtonClickEvent().AddDynamic(Controller, &ACUPlayerController::SetWantRestartMatch);
 	
 	// бинды к PlayerState
 	const auto PlayerState = Controller->GetPlayerState<ACUPlayerState>();
 	check(PlayerState);
 
 	PlayerState->GameRoleChangedEvent.AddUObject(this, &ACUHUD::OnGameRoleChanged);
+}
+
+void ACUHUD::InitWidgets()
+{
+	for (auto Class : RoleWidgetClasses)
+		AddWidgetTo(Class.Value, Class.Key, RoleWidgets);
+
+	for (auto Class : AdditionalWidgetClasses)
+		AddWidgetTo(Class.Value, Class.Key, AdditionalWidgets);
 }
 
 void ACUHUD::OnNewCharacter(ACUCharacter* Character)
@@ -58,33 +62,31 @@ void ACUHUD::OnGameRoleChanged(const EGameRole& NewRole)
 
 void ACUHUD::OnMatchStateChanged(const EMatchState& NewState)
 {
+#define ACTIVATE_ADDITIONAL_WIDGETS_ONLY(...) ActivateAdditionalWidgetsOnly({__VA_ARGS__});
+	
 	switch (NewState)
 	{
+	case EMatchState::PreStart:
+		break;
+		
 	case EMatchState::Start:
-		{
-			ActivateAdditionalWidget(EAdditionWidget::StartTime);
-		}
+			ACTIVATE_ADDITIONAL_WIDGETS_ONLY(EAdditionWidget::StartTimer);
 		break;
 		
 	case EMatchState::InProgress:
-		{
-			DeactivateAdditionalWidget(EAdditionWidget::StartTime);
-			ActivateAdditionalWidget(EAdditionWidget::GameTimer);
-		}
+			ACTIVATE_ADDITIONAL_WIDGETS_ONLY(EAdditionWidget::GameTimer);
 		break;
 
 	case EMatchState::Paused:
-		{
-			DeactivateAdditionalWidget(EAdditionWidget::GameTimer);
-		}
+			ActivateAdditionalWidget(EAdditionWidget::Pause);
 		break;
 
 	case EMatchState::Ended:
-		{
 			ActivateAdditionalWidget(EAdditionWidget::End);
-		}
 		break;
-		
+
+	default:
+		checkNoEntry();
 	}
 }
 
@@ -95,7 +97,7 @@ void ACUHUD::OnMatchTimeChanged(const int32& NewTime)
 
 void ACUHUD::OnStartMatchTicked(const int32& Tick)
 {
-	Cast<UCUStartTimerWidget>(AdditionalWidgets[EAdditionWidget::StartTime])->UpdateTimer(Tick);
+	Cast<UCUStartTimerWidget>(AdditionalWidgets[EAdditionWidget::StartTimer])->UpdateTimer(Tick);
 }
 
 void ACUHUD::ActivateRoleWidget(const EGameRole& GameRole)
@@ -113,26 +115,18 @@ void ACUHUD::ActivateRoleWidget(const EGameRole& GameRole)
 	}
 }
 
-void ACUHUD::ActivateAdditionalWidget(const EAdditionWidget& Type)
+void ACUHUD::ActivateAdditionalWidget(const EAdditionWidget& Type) const
 {
-	if (ensureMsgf(AdditionalWidgets.Contains(Type), TEXT("Key [%s] is not exist in AdditionalWodgets"), *UEnum::GetValueAsString(Type)))
-	{
-		// if (ensureMsgf(AdditionalWidgets[Type]->GetIsActive() == false, TEXT("Widget %s is already active"), *AdditionalWidgets[Type]->GetName()))
-		if (AdditionalWidgets[Type]->GetIsActive() == false)
-		{
-			AdditionalWidgets[Type]->Activate();
-		}
-	}
+	check(AdditionalWidgets.Contains(Type) && AdditionalWidgets[Type]->IsActive() == false);
+
+	AdditionalWidgets[Type]->Activate();
 }
 
-void ACUHUD::DeactivateAdditionalWidget(const EAdditionWidget& Type)
+void ACUHUD::DeactivateAllAdditionalWidgets() const
 {
-	if (ensureMsgf(AdditionalWidgets.Contains(Type), TEXT("Key [%s] is not exist in AdditionalWodgets"), *UEnum::GetValueAsString(Type)))
+	for (auto Widget : AdditionalWidgets)
 	{
-		// if (ensureMsgf(AdditionalWidgets[Type]->GetIsActive(), TEXT("Widget %s is already deactivate"), *AdditionalWidgets[Type]->GetName()))
-		if (AdditionalWidgets[Type]->GetIsActive())
-		{
-			AdditionalWidgets[Type]->Deactivate();
-		}
+		if (Widget.Value->IsActive())
+			Widget.Value->Deactivate();
 	}
 }
