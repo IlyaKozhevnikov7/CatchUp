@@ -18,6 +18,8 @@ public class CatchUp : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[]
 		{
+			"CatchUp/",
+			"CatchUp/Public/Components/Game/",
 			"CatchUp/Public/Settings/Game/",
 			"CatchUp/Public/Player/Game/",
 			"CatchUp/Public/Items/Game/",

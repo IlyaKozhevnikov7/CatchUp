@@ -65,3 +65,17 @@ enum class EInputMode : uint8
 	Game = 0,
 	UI
 };
+
+// Other
+
+USTRUCT()
+struct FDamage
+{
+	GENERATED_BODY()
+
+public:
+
+	
+	int32 Amount;
+	
+};
