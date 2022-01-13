@@ -66,16 +66,57 @@ enum class EInputMode : uint8
 	UI
 };
 
-// Other
+// Hit Types
+
+class ACUCharacter;
 
 USTRUCT()
-struct FDamage
+struct FHitBaseModifier
 {
 	GENERATED_BODY()
 
-public:
+	friend struct FHit;
 
+private:
+
+	virtual void Process(ACUCharacter* Target) {  }
+
+};
+
+USTRUCT()
+struct FHit
+{
+	GENERATED_BODY()
+
+private:
+
+	UPROPERTY(EditDefaultsOnly)
+	TSet<FHitBaseModifier> Modifiers;
+
+public:
 	
-	int32 Amount;
+	void Process(ACUCharacter* Target) const
+	{
+		ensure(Modifiers.Num() > 0);
+		
+		for (auto Modifier : Modifiers)
+			Modifier.Process(Target);
+	}
+};
+
+USTRUCT()
+struct FDamageModifier : public FHitBaseModifier
+{
+	GENERATED_BODY()
+
+private:
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
+	float Damage = 10.f;
+
+private:
+
+	virtual void Process(ACUCharacter* Target) override;
 	
 };
+

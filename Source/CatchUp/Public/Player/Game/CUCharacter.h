@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "CatchUpTypes.h"
+#include "CUHealthComponent.h"
 #include "GameFramework/Character.h"
 #include "CUCharacter.generated.h"
 
@@ -15,10 +16,15 @@ class CATCHUP_API ACUCharacter : public ACharacter
 private:
 
 	UPROPERTY(EditDefaultsOnly)
+	UCUHealthComponent* HealthComponent;
+	
+	UPROPERTY(EditDefaultsOnly)
 	TMap<EGameRole, FColor> RoleColors;
 	
 public:
 
+	FORCEINLINE UCUHealthComponent* GetHealthComponent() const { return HealthComponent; }
+	
 	void OnActivated();
 	
 	void OnDeactivated();

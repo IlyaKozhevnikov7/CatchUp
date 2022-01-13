@@ -10,7 +10,7 @@ DECLARE_MULTICAST_DELEGATE(FDamaged);
 DECLARE_MULTICAST_DELEGATE(FHealthOver);
 DECLARE_MULTICAST_DELEGATE(FHealed);
 
-struct FDamage;
+struct FHit;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CATCHUP_API UCUHealthComponent : public UActorComponent
@@ -28,9 +28,9 @@ public:
 private:
 
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
-	int32 MaxHealth;
+	float MaxHealth;
 
-	int32 CurrentHealth;
+	float CurrentHealth;
 
 protected:
 
@@ -40,12 +40,12 @@ protected:
 
 public:
 
-	void TakeDamage(const FDamage& Damage);
+	void TakeDamage(const float& Amount);
 
-	void Heal(const int32& HealAmount);
+	void Heal(const float& Amount);
 	
 private:
 
-	void SetHealth(const int32& NewHealth);
+	void SetHealth(const float& NewHealth);
 	
 };

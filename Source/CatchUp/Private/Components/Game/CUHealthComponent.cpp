@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CUHealthComponent.h"
-
-#include "CatchUpTypes.h"
 #include "CatchUp/CatchUpMacros.h"
 
 UCUHealthComponent::UCUHealthComponent()
@@ -20,27 +18,25 @@ void UCUHealthComponent::BeginPlay()
 	CurrentHealth = MaxHealth;
 }
 
-void UCUHealthComponent::TakeDamage(const FDamage& Damage)
+void UCUHealthComponent::TakeDamage(const float& Amount)
 {
 	check(COMPONENT_HAS_AUTHORITY);
-	check(Damage.Amount > 0);
 
-	SetHealth(FMath::Clamp(CurrentHealth - Damage.Amount, 0, MaxHealth));
+	//SetHealth(FMath::Clamp(CurrentHealth - Damage.Amount, 0.f, MaxHealth));
 	DamagedEvent.Broadcast();
 }
 
-void UCUHealthComponent::Heal(const int32& HealAmount)
+void UCUHealthComponent::Heal(const float& Amount)
 {
 	check(COMPONENT_HAS_AUTHORITY);
-	check(HealAmount > 0);
+	check(Amount > 0.f);
 
-	SetHealth(FMath::Clamp(CurrentHealth + HealAmount, 0, MaxHealth));
+	SetHealth(FMath::Clamp(CurrentHealth + Amount, 0.f, MaxHealth));
 	HealedEvent.Broadcast();
 }
 
-void UCUHealthComponent::SetHealth(const int32& NewHealth)
+void UCUHealthComponent::SetHealth(const float& NewHealth)
 {
-	check(NewHealth >= 0 && NewHealth >= MaxHealth);
 	CurrentHealth = NewHealth;
 	
 	if (NewHealth == 0)
