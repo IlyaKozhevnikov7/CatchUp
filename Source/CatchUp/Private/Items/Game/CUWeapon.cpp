@@ -2,6 +2,7 @@
 
 #include "CUWeapon.h"
 #include "CUCharacter.h"
+#include "CUPlayerController.h"
 
 ACUWeapon::ACUWeapon()
 {
@@ -11,9 +12,9 @@ ACUWeapon::ACUWeapon()
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>("Mesh");
 }
 
-void ACUWeapon::Init(ACUCharacter* Owner)
+void ACUWeapon::Init(ACUCharacter* OwnerCharacter)
 {
-	Controller = Owner->GetController<ACUPlayerController>();
+	Controller = OwnerCharacter->GetController<ACUPlayerController>();
 	check(Controller);
 }
 

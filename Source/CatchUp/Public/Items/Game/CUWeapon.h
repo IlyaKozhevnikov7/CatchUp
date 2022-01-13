@@ -31,7 +31,7 @@ protected:
 
 public:
 
-	void Init(ACUCharacter* Owner);
+	void Init(ACUCharacter* OwnerCharacter);
 
 	void Fire();
 	

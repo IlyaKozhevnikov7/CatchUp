@@ -10,8 +10,6 @@ DECLARE_MULTICAST_DELEGATE(FDamaged);
 DECLARE_MULTICAST_DELEGATE(FHealthOver);
 DECLARE_MULTICAST_DELEGATE(FHealed);
 
-struct FHit;
-
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class CATCHUP_API UCUHealthComponent : public UActorComponent
 {
