@@ -3,6 +3,8 @@
 #include "CUHealthComponent.h"
 #include "CatchUp/CatchUpMacros.h"
 
+DEFINE_LOG_CATEGORY_STATIC(CULogHealthComponent, All, All);
+
 UCUHealthComponent::UCUHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -21,8 +23,9 @@ void UCUHealthComponent::BeginPlay()
 void UCUHealthComponent::TakeDamage(const float& Amount)
 {
 	check(COMPONENT_HAS_AUTHORITY);
-
-	//SetHealth(FMath::Clamp(CurrentHealth - Damage.Amount, 0.f, MaxHealth));
+	check(Amount > 0.f);
+	
+	SetHealth(CurrentHealth - Amount);
 	DamagedEvent.Broadcast();
 }
 
@@ -31,13 +34,13 @@ void UCUHealthComponent::Heal(const float& Amount)
 	check(COMPONENT_HAS_AUTHORITY);
 	check(Amount > 0.f);
 
-	SetHealth(FMath::Clamp(CurrentHealth + Amount, 0.f, MaxHealth));
+	SetHealth(CurrentHealth + Amount);
 	HealedEvent.Broadcast();
 }
 
 void UCUHealthComponent::SetHealth(const float& NewHealth)
 {
-	CurrentHealth = NewHealth;
+	CurrentHealth = FMath::Clamp(NewHealth, 0.f, MaxHealth);
 	
 	if (NewHealth == 0)
 		HealthOverEvent.Broadcast();

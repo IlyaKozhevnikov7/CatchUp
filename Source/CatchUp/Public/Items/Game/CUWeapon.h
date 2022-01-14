@@ -8,6 +8,9 @@
 #include "CUWeapon.generated.h"
 
 class ACUPlayerController;
+class ACUCharacter;
+class ACUBaseBullet;
+class ACUAmmoPool;
 
 UCLASS()
 class CATCHUP_API ACUWeapon : public AActor
@@ -18,21 +21,26 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly)
 	USkeletalMeshComponent* Mesh;
-	
-	UPROPERTY(EditDefaultsOnly)
-	FHit HitInfo;
 
+	UPROPERTY(EditDefaultsOnly)
+	TArray<FBulletSet> Bullets;
+	
 	UPROPERTY()
 	ACUPlayerController* Controller;
-	
-protected:
 
+	UPROPERTY()
+	ACUAmmoPool* AmmoPool;
+	
+protected :
+	
 	ACUWeapon();
 
+	virtual void BeginPlay() override;
+	
 public:
 
 	void Init(ACUCharacter* OwnerCharacter);
 
-	void Fire();
+	void Fire();	
 	
 };

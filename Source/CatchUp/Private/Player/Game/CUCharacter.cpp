@@ -1,16 +1,22 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CUCharacter.h"
+#include "CUHealthComponent.h"
+#include "CUWeaponComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(CULogCharacter, All, All);
 
 ACUCharacter::ACUCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	bUseControllerRotationYaw = true;
 	
-	SetupDefaultState();
+	HealthComponent = CreateDefaultSubobject<UCUHealthComponent>("HealthComponent");
+	HealthComponent->bAutoActivate = false;
+	
+	WeaponComponent = CreateDefaultSubobject<UCUWeaponComponent>("WeaponComponent");
+	WeaponComponent->bAutoActivate = false;
 }
 
 void ACUCharacter::SetupDefaultState()

@@ -10,7 +10,7 @@ DECLARE_MULTICAST_DELEGATE(FDamaged);
 DECLARE_MULTICAST_DELEGATE(FHealthOver);
 DECLARE_MULTICAST_DELEGATE(FHealed);
 
-UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup = (CatchUp), meta = (BlueprintSpawnableComponent))
 class CATCHUP_API UCUHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -28,7 +28,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
 	float MaxHealth;
 
-	float CurrentHealth;
+	float CurrentHealth; // TODO onrep методы для событий на клиенте
 
 protected:
 

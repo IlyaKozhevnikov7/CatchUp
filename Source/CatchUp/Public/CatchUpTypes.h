@@ -66,11 +66,30 @@ enum class EInputMode : uint8
 	UI
 };
 
-// Hit Types
+// Bullets
 
-class ACUCharacter;
+class ACUBaseBullet;
 
 USTRUCT()
+struct FBulletSet
+{
+	GENERATED_BODY()
+
+private:
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<ACUBaseBullet> BulletType;
+
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
+	int32 Count = 0;
+	
+};
+
+// Hit Types
+
+/*class ACUCharacter;
+
+USTRUCT(BlueprintType)
 struct FHitBaseModifier
 {
 	GENERATED_BODY()
@@ -79,11 +98,11 @@ struct FHitBaseModifier
 
 private:
 
-	virtual void Process(ACUCharacter* Target) {  }
+	virtual void Process(ACUCharacter* Target) const {  }
 
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FHit
 {
 	GENERATED_BODY()
@@ -91,9 +110,14 @@ struct FHit
 private:
 
 	UPROPERTY(EditDefaultsOnly)
-	TSet<FHitBaseModifier> Modifiers;
+	TArray<FHitBaseModifier> Modifiers;
 
 public:
+
+	void AddModifier(FHitBaseModifier Modifier)
+	{
+		Modifiers.Add(Modifier);
+	}
 	
 	void Process(ACUCharacter* Target) const
 	{
@@ -104,7 +128,7 @@ public:
 	}
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FDamageModifier : public FHitBaseModifier
 {
 	GENERATED_BODY()
@@ -116,7 +140,23 @@ private:
 
 private:
 
-	virtual void Process(ACUCharacter* Target) override;
+	virtual void Process(ACUCharacter* Target) const override;
 	
 };
+
+USTRUCT(BlueprintType)
+struct FSpeedModifier : public FHitBaseModifier
+{
+	GENERATED_BODY()
+
+private:
+
+	UPROPERTY(EditDefaultsOnly)
+	float SpeedMod = -10.f;
+
+private:
+
+	virtual void Process(ACUCharacter* Target) const override;
+	
+};*/
 
