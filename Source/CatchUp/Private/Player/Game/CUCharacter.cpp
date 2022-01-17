@@ -3,6 +3,7 @@
 #include "CUCharacter.h"
 #include "CUHealthComponent.h"
 #include "CUWeaponComponent.h"
+#include "Camera/CameraComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(CULogCharacter, All, All);
 
@@ -11,12 +12,24 @@ ACUCharacter::ACUCharacter()
 	PrimaryActorTick.bCanEverTick = false;
 
 	bUseControllerRotationYaw = true;
+
+	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
+	Camera->SetupAttachment(RootComponent);
+	Camera->bUsePawnControlRotation = true;
+	
+	HandsMesh = CreateDefaultSubobject<USkeletalMeshComponent>("Hands");
+	HandsMesh->SetupAttachment(Camera);
+	HandsMesh->bOnlyOwnerSee = true;
+	HandsMesh->CastShadow = false;
 	
 	HealthComponent = CreateDefaultSubobject<UCUHealthComponent>("HealthComponent");
 	HealthComponent->bAutoActivate = false;
 	
 	WeaponComponent = CreateDefaultSubobject<UCUWeaponComponent>("WeaponComponent");
 	WeaponComponent->bAutoActivate = false;
+
+	GetMesh()->bOwnerNoSee = true;
+	GetMesh()->CastShadow = true;
 }
 
 void ACUCharacter::SetupDefaultState()

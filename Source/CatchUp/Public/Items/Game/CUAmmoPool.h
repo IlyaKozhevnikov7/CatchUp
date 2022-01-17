@@ -30,13 +30,13 @@ protected:
 
 public:
 
-	ACUBaseBullet* GetBullet(TSubclassOf<ACUBaseBullet> Type);
+	ACUBaseBullet* GetBullet(const TSubclassOf<ACUBaseBullet>& Type);
 	
 private:
 
 	void InitPool();
 
-	ACUBaseBullet* CreateBullet(TSubclassOf<ACUBaseBullet> Type);
+	ACUBaseBullet* CreateBullet(const TSubclassOf<ACUBaseBullet>& Type);
 	
 	void OnBulletHited(ACUBaseBullet* Bullet);
 	

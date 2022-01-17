@@ -41,6 +41,10 @@ public:
 
 	void Init(ACUCharacter* OwnerCharacter);
 
+	void Activate();
+
+	void Deactivate();
+	
 	void Fire();	
 	
 };

@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "CUCharacter.generated.h"
 
+class UCameraComponent;
 class UCUHealthComponent;
 class UCUWeaponComponent;
 
@@ -17,6 +18,12 @@ class CATCHUP_API ACUCharacter : public ACharacter
 
 private:
 
+  	UPROPERTY(EditDefaultsOnly)
+    UCameraComponent* Camera;
+
+	UPROPERTY(EditDefaultsOnly)
+	USkeletalMeshComponent* HandsMesh;
+	
 	UPROPERTY(EditDefaultsOnly)
 	UCUHealthComponent* HealthComponent;
 

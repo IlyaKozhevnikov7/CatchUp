@@ -44,7 +44,7 @@ void ACUGameMode::PostLogin(APlayerController* NewPlayer)
 	K2_PostLogin(NewPlayer);
 	FGameModeEvents::GameModePostLoginEvent.Broadcast(this, NewPlayer);
 
-	DELAY_WITH_PARAMS(this, &ACUGameMode::RestartPlayer, 2.f, Cast<AController>(NewPlayer));
+	DELAY_WITH_PARAMS(this, &ACUGameMode::RestartPlayer, 0.1f, Cast<AController>(NewPlayer));
 	
 	if (PlayerStates.Num() == GameSettings.PlayerNum)
 		ChangeMatchState(EMatchState::PreStart);
@@ -191,7 +191,7 @@ void ACUGameMode::SelectRunners()
 void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 {
 #define BREAK_IF_TIMER_ACTIVE(TimerHandle)							\
-	if (GetWorldTimerManager().IsTimerActive(TimerHandle))	\
+	if (GetWorldTimerManager().IsTimerActive(TimerHandle))			\
 		break;														\
 
 	switch (NewState)
@@ -199,7 +199,7 @@ void ACUGameMode::ChangeMatchState(const EMatchState& NewState)
 	case EMatchState::PreStart:
 		{
 			FTimerHandle TimerHandle;
-			GetWorldTimerManager().SetTimer(TimerHandle, [this] { ChangeMatchState(EMatchState::Start); }, 5.f, false);
+			GetWorldTimerManager().SetTimer(TimerHandle, [this] { ChangeMatchState(EMatchState::Start); }, GameSettings.PreStartMatchTicks, false);
 		}
 		break;
 

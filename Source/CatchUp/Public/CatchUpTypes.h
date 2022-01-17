@@ -29,7 +29,10 @@ public:
 	int32 CatcherNum = 1;
 
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
-	int32 StartMatchTicks = 5;
+	int32 PreStartMatchTicks = 5;
+	
+	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
+	int32 StartMatchTicks = 3;
 
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0", ClampMax = "300"))
 	int32 MatchTime = 120;

@@ -17,7 +17,7 @@ void ACUAmmoPool::BeginPlay()
 	InitPool();
 }
 
-ACUBaseBullet* ACUAmmoPool::GetBullet(TSubclassOf<ACUBaseBullet> Type)
+ACUBaseBullet* ACUAmmoPool::GetBullet(const TSubclassOf<ACUBaseBullet>& Type)
 {
 	if (BulletPools[Type].IsEmpty())
 		return CreateBullet(Type);
@@ -38,7 +38,7 @@ void ACUAmmoPool::InitPool()
 	}
 }
 
-ACUBaseBullet* ACUAmmoPool::CreateBullet(TSubclassOf<ACUBaseBullet> Type)
+ACUBaseBullet* ACUAmmoPool::CreateBullet(const TSubclassOf<ACUBaseBullet>& Type)
 {
 	const auto NewBullet = GetWorld()->SpawnActor<ACUBaseBullet>(Type);
 	NewBullet->HitEvent.AddUObject(this, &ACUAmmoPool::OnBulletHited);

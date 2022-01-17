@@ -33,6 +33,16 @@ void ACUWeapon::Init(ACUCharacter* OwnerCharacter)
 	check(Controller);
 }
 
+void ACUWeapon::Activate()
+{
+	// показать меш
+}
+
+void ACUWeapon::Deactivate()
+{
+	// скрыть меш
+}
+
 void ACUWeapon::Fire()
 {
 }

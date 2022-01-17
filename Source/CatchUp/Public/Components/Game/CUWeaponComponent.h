@@ -28,7 +28,12 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-
+	
 	void Fire();
+	
+private:
+
+	UFUNCTION()
+	void OnActivated(UActorComponent* Component, bool bReset);
 	
 };
