@@ -4,10 +4,11 @@
 #include "CUHealthComponent.h"
 #include "CUWeaponComponent.h"
 #include "Camera/CameraComponent.h"
+#include "CUSkeletalMeshComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(CULogCharacter, All, All);
 
-ACUCharacter::ACUCharacter()
+ACUCharacter::ACUCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCUSkeletalMeshComponent>(ACharacter::MeshComponentName))
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -21,6 +22,8 @@ ACUCharacter::ACUCharacter()
 	HandsMesh->SetupAttachment(Camera);
 	HandsMesh->bOnlyOwnerSee = true;
 	HandsMesh->CastShadow = false;
+
+	CUMesh = Cast<UCUSkeletalMeshComponent>(GetMesh());
 	
 	HealthComponent = CreateDefaultSubobject<UCUHealthComponent>("HealthComponent");
 	HealthComponent->bAutoActivate = false;
@@ -33,7 +36,7 @@ ACUCharacter::ACUCharacter()
 }
 
 void ACUCharacter::SetupDefaultState()
-{
+{	
 	// выставить компонентам состояние по умолчанию
 }
 
@@ -42,6 +45,7 @@ void ACUCharacter::OnActivated()
 	UE_LOG(CULogCharacter, Display, TEXT("OnActivated"));
 	
 	SetupDefaultState();
+	Cast<UCUSkeletalMeshComponent>(GetMesh())->SetRoleMesh(EGameRole::Runner); // TODO remove
 }
 
 void ACUCharacter::OnDeactivated()

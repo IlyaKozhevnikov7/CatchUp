@@ -49,6 +49,20 @@ enum class EGameRole : uint8
 	Indefined
 };
 
+USTRUCT()
+struct FMeshSet
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditDefaultsOnly)
+	USkeletalMesh* Mesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UAnimInstance> AnimationClass;
+};
+
 // HUD
 
 UENUM()

@@ -10,19 +10,30 @@
 class UCameraComponent;
 class UCUHealthComponent;
 class UCUWeaponComponent;
+class UCUSkeletalMeshComponent;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLanded, const FHitResult&, LandHit);
 
 UCLASS()
 class CATCHUP_API ACUCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
-private:
+public:
 
-  	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(BlueprintAssignable)
+	FLanded LandedEvent;
+	
+protected:
+
+  	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
     UCameraComponent* Camera;
 
 	UPROPERTY(EditDefaultsOnly)
 	USkeletalMeshComponent* HandsMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	UCUSkeletalMeshComponent* CUMesh;
 	
 	UPROPERTY(EditDefaultsOnly)
 	UCUHealthComponent* HealthComponent;
@@ -43,7 +54,7 @@ public:
 	
 private:
 	
-	ACUCharacter();
+	ACUCharacter(const FObjectInitializer& ObjectInitializer);
 
 	void SetupDefaultState();
 	
