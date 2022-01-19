@@ -59,7 +59,7 @@ void ACUPlayerController::OnRep_Pawn()
 	{
 		if (GetWorld()->GetGameState<ACUGameState>())
 			HandleMatchState(GetWorld()->GetGameState<ACUGameState>()->GetGameState());
-		
+
 		CUHUD->OnNewCharacter(GetPawn<ACUCharacter>());	
 	}
 }

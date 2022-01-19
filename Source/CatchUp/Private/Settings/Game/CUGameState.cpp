@@ -20,19 +20,18 @@ void ACUGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 
 void ACUGameState::ChangeMatchState(const EMatchState& NewState)
 {
-	if (HasAuthority())
-	{
-		check(NewState != MatchState);
-		
-		MatchState = NewState;
-		MatchStateChangedEvent.Broadcast(MatchState);
+	check(HasAuthority());
+	check(NewState != MatchState);
 
-		UE_LOG(CULogGameState, Display, TEXT("[Server] %s"), *UEnum::GetValueAsString(NewState))
-	}
+	MatchState = NewState;
+	MatchStateChangedEvent.Broadcast(MatchState);
+
+	UE_LOG(CULogGameState, Display, TEXT("[Server] %s"), *UEnum::GetValueAsString(NewState));
 }
 
 void ACUGameState::OnMatchRestarted()
 {
+	check(HasAuthority());
 	WantingRestartMatch.Reset();
 
 	for (auto PlayerState : PlayerArray)

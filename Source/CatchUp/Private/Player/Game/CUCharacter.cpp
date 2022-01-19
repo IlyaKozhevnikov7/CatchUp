@@ -2,6 +2,7 @@
 
 #include "CUCharacter.h"
 #include "CUHealthComponent.h"
+#include "CUPlayerState.h"
 #include "CUWeaponComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CUSkeletalMeshComponent.h"
@@ -23,29 +24,43 @@ ACUCharacter::ACUCharacter(const FObjectInitializer& ObjectInitializer) : Super(
 	HandsMesh->bOnlyOwnerSee = true;
 	HandsMesh->CastShadow = false;
 
-	CUMesh = Cast<UCUSkeletalMeshComponent>(GetMesh());
+	GetMesh()->bOwnerNoSee = true;
+	GetMesh()->CastShadow = true;
 	
 	HealthComponent = CreateDefaultSubobject<UCUHealthComponent>("HealthComponent");
 	HealthComponent->bAutoActivate = false;
 	
 	WeaponComponent = CreateDefaultSubobject<UCUWeaponComponent>("WeaponComponent");
 	WeaponComponent->bAutoActivate = false;
+}
 
-	GetMesh()->bOwnerNoSee = true;
-	GetMesh()->CastShadow = true;
+void ACUCharacter::PostActorCreated()
+{
+	Super::PostActorCreated();
+
+	CUMesh = Cast<UCUSkeletalMeshComponent>(GetMesh());
+}
+
+void ACUCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (auto CUPlayerState = GetPlayerState<ACUPlayerState>())
+	{
+		CUPlayerState->GameRoleChangedEvent.AddUObject(this, &ACUCharacter::OnGameRoleChanged);
+		// TODO сделать отписку от предыдущего PlayerState
+	}
 }
 
 void ACUCharacter::SetupDefaultState()
-{	
-	// выставить компонентам состояние по умолчанию
+{
+
 }
 
-void ACUCharacter::OnActivated()
+// Вызывается только на сервере
+void ACUCharacter::ResetState()
 {
-	UE_LOG(CULogCharacter, Display, TEXT("OnActivated"));
 	
-	SetupDefaultState();
-	Cast<UCUSkeletalMeshComponent>(GetMesh())->SetRoleMesh(EGameRole::Runner); // TODO remove
 }
 
 void ACUCharacter::OnDeactivated()
@@ -53,9 +68,25 @@ void ACUCharacter::OnDeactivated()
 	
 }
 
-void ACUCharacter::SetRoleColor()
+void ACUCharacter::OnGameRoleChanged(const EGameRole& NewRole)
 {
+	CUMesh->SetRoleMesh(NewRole);
+}
 
+float ACUCharacter::GetDirection() const
+{
+	if (GetVelocity().IsZero())
+		return 0.f;
+	
+	const FVector NormalVelocity = GetVelocity().GetSafeNormal();
+	
+	const float Angle = FMath::Acos(
+		FVector::DotProduct(GetActorForwardVector(), NormalVelocity));
+	
+	const float Sign = FMath::Sign(
+		FVector::CrossProduct(GetActorForwardVector(), NormalVelocity).Z);
+
+	return FMath::RadiansToDegrees(Angle * Sign);
 }
 
 void ACUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

@@ -44,7 +44,7 @@ void ACUGameMode::PostLogin(APlayerController* NewPlayer)
 	K2_PostLogin(NewPlayer);
 	FGameModeEvents::GameModePostLoginEvent.Broadcast(this, NewPlayer);
 
-	DELAY_WITH_PARAMS(this, &ACUGameMode::RestartPlayer, 0.1f, Cast<AController>(NewPlayer));
+	DELAY_WITH_PARAMS(this, &ACUGameMode::RestartPlayer, 1.f, Cast<AController>(NewPlayer));
 	
 	if (PlayerStates.Num() == GameSettings.PlayerNum)
 		ChangeMatchState(EMatchState::PreStart);
@@ -122,7 +122,7 @@ void ACUGameMode::RestartPlayer(AController* NewPlayer)
 		
 		SetupPlayer(NewPlayer, FreePawn, StartSpot->GetTransform());
 
-		FreePawn->OnActivated();
+		FreePawn->ResetState();
 	}
 	else
 	{
@@ -146,8 +146,6 @@ void ACUGameMode::SetupPlayer(AController* Controller, APawn* Pawn, const FTrans
 
 	Controller->ClientSetRotation(Rotation.Rotator());
 	Controller->SetControlRotation(Rotation.Rotator());
-
-	K2_OnRestartPlayer(Controller);
 }
 
 void ACUGameMode::GiveOutRoles()

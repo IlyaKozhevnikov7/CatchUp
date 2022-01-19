@@ -16,9 +16,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<EGameRole, FMeshSet> MeshSets;
-
+	
 public:
-
+	
 	void SetRoleMesh(const EGameRole& GameRole);
 	
 };

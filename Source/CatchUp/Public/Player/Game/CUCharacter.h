@@ -7,22 +7,16 @@
 #include "GameFramework/Character.h"
 #include "CUCharacter.generated.h"
 
+class ACUPlayerState;
 class UCameraComponent;
 class UCUHealthComponent;
 class UCUWeaponComponent;
 class UCUSkeletalMeshComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLanded, const FHitResult&, LandHit);
-
 UCLASS()
 class CATCHUP_API ACUCharacter : public ACharacter
 {
 	GENERATED_BODY()
-
-public:
-
-	UPROPERTY(BlueprintAssignable)
-	FLanded LandedEvent;
 	
 protected:
 
@@ -45,17 +39,24 @@ protected:
 	TMap<EGameRole, FColor> RoleColors;
 	
 public:
-	
-	void OnActivated();
+
+	void ResetState();
 	
 	void OnDeactivated();
+	
+	void OnGameRoleChanged(const EGameRole& NewRole);
 
-	void SetRoleColor();
+	UFUNCTION(BlueprintPure)
+	float GetDirection() const;
 	
 private:
-	
+
 	ACUCharacter(const FObjectInitializer& ObjectInitializer);
 
+	virtual void PostActorCreated() override;
+
+	void OnRep_PlayerState() override;
+	
 	void SetupDefaultState();
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -63,5 +64,5 @@ private:
 	void MoveForward(float Amount);
 	
 	void MoveRight(float Amount);
-
+	
 };

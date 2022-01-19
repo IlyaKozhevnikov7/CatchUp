@@ -5,7 +5,7 @@
 void UCUSkeletalMeshComponent::SetRoleMesh(const EGameRole& GameRole)
 {
 	check(MeshSets.Contains(GameRole));
-
+	
 	SetSkeletalMesh(MeshSets[GameRole].Mesh);
 	SetAnimInstanceClass(MeshSets[GameRole].AnimationClass);
 }
