@@ -48,7 +48,7 @@ public:
 	FORCEINLINE bool IsActive() const { return bIsActive; }
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Launch(const FVector_NetQuantize& TargetLocation);
+	void Launch();
 	
 private:
 

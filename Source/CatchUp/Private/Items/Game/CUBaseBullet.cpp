@@ -57,7 +57,7 @@ void ACUBaseBullet::ProcessHit_Implementation(AActor* Target)
 	}
 }
 
-void ACUBaseBullet::Launch_Implementation(const FVector_NetQuantize& TargetLocation)
+void ACUBaseBullet::Launch_Implementation()
 {
 	if (HasAuthority())
 	{

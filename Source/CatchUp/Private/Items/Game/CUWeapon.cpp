@@ -60,7 +60,7 @@ void ACUWeapon::Fire(const FVector_NetQuantize& TargetLocation)
 	const FVector MuzzleLocation = Mesh->GetSocketLocation("Muzzle");
 	
 	Bullet->SetActorLocationAndRotation(MuzzleLocation, (TargetLocation - MuzzleLocation).Rotation());
-	Bullet->Launch(TargetLocation);
+	Bullet->Launch();
 }
 
 void ACUWeapon::InitAmmoPool()

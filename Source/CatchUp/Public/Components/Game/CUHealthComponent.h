@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "CUHealthComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FDamaged);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FDamaged, const float&, const float&);
 DECLARE_MULTICAST_DELEGATE(FHealthOver);
 DECLARE_MULTICAST_DELEGATE(FHealed);
 
@@ -28,14 +28,19 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
 	float MaxHealth;
 
-	float CurrentHealth; // TODO onrep методы для событий на клиенте
+	UPROPERTY(ReplicatedUsing = "OnRep_CurrentHealth")
+	float CurrentHealth;
 
+	float LastHealthAmount;
+	
 protected:
 
 	UCUHealthComponent();
 
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 public:
 
 	void TakeDamage(const float& Amount);
@@ -45,5 +50,8 @@ public:
 private:
 
 	void SetHealth(const float& NewHealth);
+
+	UFUNCTION()
+	void OnRep_CurrentHealth();
 	
 };

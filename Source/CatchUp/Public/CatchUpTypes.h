@@ -71,7 +71,8 @@ enum class EAdditionWidget : uint8
 	GameTimer = 0,
 	StartTimer,
 	Pause,
-	End
+	End,
+	InfectionScale
 };
 
 // Controller

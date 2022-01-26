@@ -2,7 +2,10 @@
 
 #include "CUHUD.h"
 #include "CUBaseWidget.h"
+#include "CUCharacter.h"
 #include "CUGameState.h"
+#include "CUHealthComponent.h"
+#include "CUInfectionScaleWidget.h"
 #include "CUMatchEndWidget.h"
 #include "CUPlayerController.h"
 #include "CUPlayerState.h"
@@ -52,7 +55,10 @@ void ACUHUD::InitWidgets()
 
 void ACUHUD::OnNewCharacter(ACUCharacter* Character)
 {
-	
+	if (auto Health = Character->FindComponentByClass<UCUHealthComponent>())
+	{
+		Health->DamagedEvent.AddUObject(Cast<UCUInfectionScaleWidget>(AdditionalWidgets[EAdditionWidget::InfectionScale]), &UCUInfectionScaleWidget::OnDamaged);
+	}
 }
 
 void ACUHUD::OnGameRoleChanged(const EGameRole& NewRole)
@@ -74,7 +80,7 @@ void ACUHUD::OnMatchStateChanged(const EMatchState& NewState)
 		break;
 		
 	case EMatchState::InProgress:
-			ACTIVATE_ADDITIONAL_WIDGETS_ONLY(EAdditionWidget::GameTimer);
+			ACTIVATE_ADDITIONAL_WIDGETS_ONLY(EAdditionWidget::GameTimer, EAdditionWidget::InfectionScale);
 		break;
 
 	case EMatchState::Paused:
