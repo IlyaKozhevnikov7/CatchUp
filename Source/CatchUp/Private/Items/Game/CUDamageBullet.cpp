@@ -9,12 +9,14 @@ ACUDamageBullet::ACUDamageBullet()
 }
 
 void ACUDamageBullet::ProcessHit(AActor* Target)
-{
-	if (HasAuthority())
+{	
+	if (HasAuthority() && Target)
 	{
 		if (auto HealthComponent = Target->FindComponentByClass<UCUHealthComponent>())
 		{
 			HealthComponent->TakeDamage(Damage);
 		}
 	}
+
+	Super::ProcessHit(Target);
 }

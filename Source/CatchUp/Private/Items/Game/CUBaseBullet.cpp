@@ -15,10 +15,13 @@ ACUBaseBullet::ACUBaseBullet()
 	SetReplicatingMovement(true);
 
 	Collision = CreateDefaultSubobject<USphereComponent>("Collision");
+	Collision->SetGenerateOverlapEvents(false);
+	Collision->BodyInstance.bNotifyRigidBodyCollision = true;
 	Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetRootComponent(Collision);
 	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	Mesh->SetGenerateOverlapEvents(false);
 	Mesh->SetupAttachment(RootComponent);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
@@ -49,7 +52,7 @@ void ACUBaseBullet::ProcessHit_Implementation(AActor* Target)
 	}
 	else
 	{
-		Mesh->SetVisibility(false);
+		Mesh->SetVisibility(false, true);
 		// проиграть fx
 	}
 }
@@ -75,12 +78,9 @@ void ACUBaseBullet::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalI
 {
 	check(HasAuthority());
 
-	if (const auto Target = Cast<ACUCharacter>(OtherActor))
-	{
-		ProcessHit(Target);
-		HitEvent.Broadcast(this); // для AmmoPool
-		
-		bIsActive = false;
-	}
+	ProcessHit(OtherActor);
+	HitEvent.Broadcast(this); // для AmmoPool
+	
+	bIsActive = false;
 }
 
