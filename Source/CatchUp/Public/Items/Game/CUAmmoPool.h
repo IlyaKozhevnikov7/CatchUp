@@ -20,7 +20,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TArray<TSubclassOf<ACUBaseBullet>> BulletsType;
 
-	TMap<TSubclassOf<ACUBaseBullet>, TQueue<ACUBaseBullet*>> BulletPools;
+	TMap<TSubclassOf<ACUBaseBullet>, TArray<ACUBaseBullet*>> Pools;
 	
 protected:
 

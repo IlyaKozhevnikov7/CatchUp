@@ -27,6 +27,8 @@ void UCUHealthComponent::TakeDamage(const float& Amount)
 	
 	SetHealth(CurrentHealth - Amount);
 	DamagedEvent.Broadcast();
+
+	UE_LOG(CULogHealthComponent, Display, TEXT("%s Damaged [%f]"), *GetOwner()->GetName(), Amount);
 }
 
 void UCUHealthComponent::Heal(const float& Amount)

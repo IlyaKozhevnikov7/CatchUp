@@ -30,7 +30,9 @@ public:
 	UFUNCTION()
 	void SetWantRestartMatch();
 	
-private:
+protected:
+	
+	ACUPlayerController();
 
 	virtual void BeginPlay() override;
 	
@@ -39,6 +41,8 @@ private:
 	virtual void OnRep_PlayerState() override;
 	
 	virtual void OnRep_Pawn() override;
+
+private:
 	
 	void HandleMatchState(const EMatchState& NewState);
 

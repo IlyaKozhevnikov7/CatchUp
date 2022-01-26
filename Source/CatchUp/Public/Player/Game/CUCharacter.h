@@ -27,7 +27,7 @@ protected:
 	USkeletalMeshComponent* HandsMesh;
 
 	UPROPERTY(EditDefaultsOnly)
-	UCUSkeletalMeshComponent* CUMesh;
+	UCUSkeletalMeshComponent* RoleMesh;
 	
 	UPROPERTY(EditDefaultsOnly)
 	UCUHealthComponent* HealthComponent;
@@ -55,6 +55,8 @@ private:
 
 	virtual void PostActorCreated() override;
 
+	virtual void PossessedBy(AController* NewController) override;
+	
 	void OnRep_PlayerState() override;
 	
 	void SetupDefaultState();

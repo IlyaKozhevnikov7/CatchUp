@@ -7,6 +7,8 @@
 #include "GameFramework/Actor.h"
 #include "CUWeapon.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FActiveChanged, const bool&);
+
 class ACUPlayerController;
 class ACUCharacter;
 class ACUBaseBullet;
@@ -17,6 +19,10 @@ class CATCHUP_API ACUWeapon : public AActor
 {
 	GENERATED_BODY()
 
+public:
+
+	FActiveChanged ActiveChangedEvent;
+	
 private:
 	
 	UPROPERTY(EditDefaultsOnly)
@@ -24,27 +30,37 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FBulletSet> Bullets;
-	
-	UPROPERTY()
-	ACUPlayerController* Controller;
 
 	UPROPERTY()
 	ACUAmmoPool* AmmoPool;
-	
-protected :
+
+	UPROPERTY(ReplicatedUsing = "OnRep_IsActive")
+	bool bIsActive;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<ACUBaseBullet> TempBulletType;
+ 	
+protected:
 	
 	ACUWeapon();
 
 	virtual void BeginPlay() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 public:
 
-	void Init(ACUCharacter* OwnerCharacter);
-
-	void Activate();
-
-	void Deactivate();
+	bool CanFire() const;
 	
-	void Fire();	
+	void SetActive(const bool& bNewActive);
+
+	void Fire(const FVector_NetQuantize& TargetLocation);
+
+private:
+
+	void InitAmmoPool();
+
+	UFUNCTION()
+	void OnRep_IsActive();
 	
 };

@@ -9,6 +9,11 @@
 
 DEFINE_LOG_CATEGORY_STATIC(CULogPlayerController, All, All);
 
+ACUPlayerController::ACUPlayerController()
+{
+	PrimaryActorTick.bStartWithTickEnabled = true;
+}
+
 void ACUPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -32,7 +37,7 @@ void ACUPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	InputComponent->BindAction("Pause", IE_Pressed, this, &APlayerController::Pause).bExecuteWhenPaused = true;;
+	InputComponent->BindAction("Pause", IE_Pressed, this, &APlayerController::Pause).bExecuteWhenPaused = true;
 	
 	InputComponent->BindAxis("Turn", this, &APlayerController::AddYawInput);
 	InputComponent->BindAxis("LookAt", this, &APlayerController::AddPitchInput);

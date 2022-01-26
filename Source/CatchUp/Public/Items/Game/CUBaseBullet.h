@@ -32,18 +32,23 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	UProjectileMovementComponent* Movement;
 
+	bool bIsActive;
+	
 protected:
 
 	ACUBaseBullet();
 
 	virtual void BeginPlay() override;
-
+	
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void ProcessHit(AActor* Target);
-
+	
 public:
 
-	void Activate();
+	FORCEINLINE bool IsActive() const { return bIsActive; }
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Launch(const FVector_NetQuantize& TargetLocation);
 	
 private:
 

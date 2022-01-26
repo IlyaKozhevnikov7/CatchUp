@@ -38,7 +38,18 @@ void ACUCharacter::PostActorCreated()
 {
 	Super::PostActorCreated();
 
-	CUMesh = Cast<UCUSkeletalMeshComponent>(GetMesh());
+	RoleMesh = Cast<UCUSkeletalMeshComponent>(GetMesh());
+	check(RoleMesh);
+}
+
+void ACUCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (auto CUPlayerState = Cast<ACUPlayerState>(NewController->PlayerState))
+	{
+		CUPlayerState->GameRoleChangedEvent.AddUObject(this, &ACUCharacter::OnGameRoleChanged);
+	}
 }
 
 void ACUCharacter::OnRep_PlayerState()
@@ -60,7 +71,11 @@ void ACUCharacter::SetupDefaultState()
 // Вызывается только на сервере
 void ACUCharacter::ResetState()
 {
+	const auto PlayerController = GetController<APlayerController>();
+	check(PlayerController);
 	
+	WeaponComponent->SetController(PlayerController);
+	RoleMesh->SetRoleMesh(PlayerController->GetPlayerState<ACUPlayerState>()->GetGameRole());
 }
 
 void ACUCharacter::OnDeactivated()
@@ -70,7 +85,19 @@ void ACUCharacter::OnDeactivated()
 
 void ACUCharacter::OnGameRoleChanged(const EGameRole& NewRole)
 {
-	CUMesh->SetRoleMesh(NewRole);
+	RoleMesh->SetRoleMesh(NewRole);
+	
+	if (HasAuthority())
+	{
+		if (NewRole == EGameRole::Catcher)
+			WeaponComponent->Activate(true);
+		else
+			WeaponComponent->Deactivate();
+	}
+	else
+	{
+		
+	}
 }
 
 float ACUCharacter::GetDirection() const
@@ -94,6 +121,8 @@ void ACUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	InputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &UCUWeaponComponent::Fire);
+	InputComponent->BindAction("StopFire", IE_Released, WeaponComponent, &UCUWeaponComponent::StopFire);
 
 	InputComponent->BindAxis("MoveForward", this, &ACUCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ACUCharacter::MoveRight);

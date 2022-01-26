@@ -2,47 +2,79 @@
 
 #include "CUWeapon.h"
 #include "CUCharacter.h"
-#include "CUPlayerController.h"
 #include "CUAmmoPool.h"
+#include "CUDamageBullet.h"
 #include "EngineUtils.h"
+#include "Net/UnrealNetwork.h"
 
 ACUWeapon::ACUWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
+	SetReplicates(true);
+	
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>("Mesh");
+	Mesh->SetVisibility(false, true);
 }
 
 void ACUWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (auto Pool : TActorRange<ACUAmmoPool>(GetWorld()))
+	if (HasAuthority())
+	{
+		InitAmmoPool();
+		check(AmmoPool);
+	}
+	
+	check(Mesh);
+}
+
+void ACUWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACUWeapon, bIsActive);
+}
+
+bool ACUWeapon::CanFire() const
+{
+	return bIsActive;
+}
+
+void ACUWeapon::SetActive(const bool& bNewActive)
+{
+	check(HasAuthority());
+	
+	bIsActive = bNewActive;
+}
+
+void ACUWeapon::Fire(const FVector_NetQuantize& TargetLocation)
+{
+	check(HasAuthority());
+	
+	const auto Bullet = AmmoPool->GetBullet(TempBulletType);
+	check(Bullet);
+
+	const FVector MuzzleLocation = Mesh->GetSocketLocation("Muzzle");
+	
+	Bullet->SetActorLocationAndRotation(MuzzleLocation, (TargetLocation - MuzzleLocation).Rotation());
+	Bullet->Launch(TargetLocation);
+}
+
+void ACUWeapon::InitAmmoPool()
+{
+	for (const auto Pool : TActorRange<ACUAmmoPool>(GetWorld()))
 	{
 		AmmoPool = Pool;
 		break;
 	}
-
-	check(AmmoPool);
 }
 
-void ACUWeapon::Init(ACUCharacter* OwnerCharacter)
+void ACUWeapon::OnRep_IsActive()
 {
-	Controller = OwnerCharacter->GetController<ACUPlayerController>();
-	check(Controller);
-}
-
-void ACUWeapon::Activate()
-{
-	// показать меш
-}
-
-void ACUWeapon::Deactivate()
-{
-	// скрыть меш
-}
-
-void ACUWeapon::Fire()
-{
+	//Mesh->SetVisibility(bIsActive, true);
+	
+	ActiveChangedEvent.Broadcast(bIsActive);
 }

@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "CUWeaponComponent.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FActiveChanged, const bool&);
+
 class ACUWeapon;
 
 UCLASS(ClassGroup = (CatchUp), meta = (BlueprintSpawnableComponent))
@@ -13,27 +15,51 @@ class CATCHUP_API UCUWeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+public:
+
+	FActiveChanged ActiveChangedEvent;
+	
 private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<ACUWeapon> WeaponClass;
-	
-	UPROPERTY()
-	ACUWeapon* Weapon;
 
+	UPROPERTY()
+	APlayerController* Owner;
+	
+	UPROPERTY(Replicated)
+	ACUWeapon* Weapon;
+	
 protected:
 	
 	UCUWeaponComponent();
 	
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	virtual void OnRep_IsActive() override;
+	
 public:
+
+	void SetController(APlayerController* NewOwner);
 	
 	void Fire();
+
+	void StopFire();
+	
+	FORCEINLINE bool CanFire() const;
+
+	virtual void Activate(bool bReset) override;
+
+	virtual void Deactivate() override;
 	
 private:
 
 	UFUNCTION()
-	void OnActivated(UActorComponent* Component, bool bReset);
+	void OnActiveChanged(const bool& bNewActive);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void FireServer();
 	
 };

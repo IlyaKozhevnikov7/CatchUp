@@ -2,8 +2,10 @@
 
 #include "CUBaseBullet.h"
 #include "CUCharacter.h"
+#include "DrawDebugHelpers.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ACUBaseBullet::ACUBaseBullet()
 {
@@ -13,7 +15,7 @@ ACUBaseBullet::ACUBaseBullet()
 	SetReplicatingMovement(true);
 
 	Collision = CreateDefaultSubobject<USphereComponent>("Collision");
-	Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetRootComponent(Collision);
 	
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
@@ -21,13 +23,17 @@ ACUBaseBullet::ACUBaseBullet()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	Movement = CreateDefaultSubobject<UProjectileMovementComponent>("Movement");
+	Movement->ProjectileGravityScale = 0.f;
+	Movement->InitialSpeed = 2000.f;
 	Movement->bAutoActivate = false;
+	
+	bIsActive = false;
 }
 
 void ACUBaseBullet::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if (HasAuthority())
 	{
 		OnActorHit.AddDynamic(this, &ACUBaseBullet::OnHit);
@@ -48,16 +54,20 @@ void ACUBaseBullet::ProcessHit_Implementation(AActor* Target)
 	}
 }
 
-void ACUBaseBullet::Activate()
+void ACUBaseBullet::Launch_Implementation(const FVector_NetQuantize& TargetLocation)
 {
 	if (HasAuthority())
 	{
 		Collision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		
+		bIsActive = true;
+		
+		Movement->Velocity = GetActorForwardVector() * Movement->InitialSpeed;
 		Movement->Activate(true);
 	}
 	else
 	{
-		Mesh->SetVisibility(true);
+		Mesh->SetVisibility(true, true);
 	}
 }
 
@@ -69,6 +79,8 @@ void ACUBaseBullet::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalI
 	{
 		ProcessHit(Target);
 		HitEvent.Broadcast(this); // для AmmoPool
+		
+		bIsActive = false;
 	}
 }
 

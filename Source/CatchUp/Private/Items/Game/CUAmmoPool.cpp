@@ -6,12 +6,15 @@
 ACUAmmoPool::ACUAmmoPool()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
+	bNetLoadOnClient = false;
+	
 	StartObjectAmount = 150;
 }
 
 void ACUAmmoPool::BeginPlay()
 {
+	check(HasAuthority());
+	
 	Super::BeginPlay();
 
 	InitPool();
@@ -19,11 +22,16 @@ void ACUAmmoPool::BeginPlay()
 
 ACUBaseBullet* ACUAmmoPool::GetBullet(const TSubclassOf<ACUBaseBullet>& Type)
 {
-	if (BulletPools[Type].IsEmpty())
-		return CreateBullet(Type);
+	check(Pools.Contains(Type));
 
-	ACUBaseBullet* Bullet = nullptr; 
-	BulletPools[Type].Dequeue(Bullet);
+	const auto Bullet = *Pools[Type].FindByPredicate([](ACUBaseBullet* Element)
+	{
+		return Element->IsActive() == false;
+	});
+
+	if (Bullet == nullptr)
+		return CreateBullet(Type);
+	
 	return Bullet;
 }
 
@@ -31,10 +39,10 @@ void ACUAmmoPool::InitPool()
 {
 	for (auto Type : BulletsType)
 	{
+		Pools.Add(Type);
+		
 		for (int32 i = 0; i < StartObjectAmount; i++)
-		{	
-			BulletPools[Type].Enqueue(CreateBullet(Type));
-		}		
+			Pools[Type].Add(CreateBullet(Type));
 	}
 }
 
@@ -47,5 +55,5 @@ ACUBaseBullet* ACUAmmoPool::CreateBullet(const TSubclassOf<ACUBaseBullet>& Type)
 
 void ACUAmmoPool::OnBulletHited(ACUBaseBullet* Bullet)
 {
-	BulletPools[Bullet->GetClass()].Enqueue(Bullet);
+	Pools[Bullet->GetClass()].Add(Bullet);
 }
