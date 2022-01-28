@@ -50,12 +50,13 @@ void ACUWeapon::SetActive(const bool& bNewActive)
 	bIsActive = bNewActive;
 }
 
-void ACUWeapon::Fire(const FVector_NetQuantize& TargetLocation)
+void ACUWeapon::Fire(const FVector& TargetLocation, FBulletOwnerData InstigatorData)
 {
 	check(HasAuthority());
 	
 	const auto Bullet = AmmoPool->GetBullet(TempBulletType);
 	check(Bullet);
+	Bullet->Init(InstigatorData);
 
 	const FVector MuzzleLocation = Mesh->GetSocketLocation("Muzzle");
 	
@@ -74,7 +75,5 @@ void ACUWeapon::InitAmmoPool()
 
 void ACUWeapon::OnRep_IsActive()
 {
-	//Mesh->SetVisibility(bIsActive, true);
-	
 	ActiveChangedEvent.Broadcast(bIsActive);
 }

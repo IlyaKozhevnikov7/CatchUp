@@ -13,6 +13,7 @@ class ACUPlayerController;
 class ACUCharacter;
 class ACUBaseBullet;
 class ACUAmmoPool;
+struct FBulletOwnerData;
 
 UCLASS()
 class CATCHUP_API ACUWeapon : public AActor
@@ -54,7 +55,7 @@ public:
 	
 	void SetActive(const bool& bNewActive);
 
-	void Fire(const FVector_NetQuantize& TargetLocation);
+	void Fire(const FVector& TargetLocation, FBulletOwnerData InstigatorData);
 
 private:
 

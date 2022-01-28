@@ -29,13 +29,21 @@ void UCUHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	DOREPLIFETIME(UCUHealthComponent, CurrentHealth);
 }
 
+void UCUHealthComponent::Reset(const EGameRole& NewRole)
+{
+	check(COMPONENT_HAS_AUTHORITY);
+
+	CurrentHealth = NewRole == EGameRole::Runner
+		                ? MaxHealth
+		                : 0.f;
+}
+
 void UCUHealthComponent::TakeDamage(const float& Amount)
 {
 	check(COMPONENT_HAS_AUTHORITY);
 	check(Amount > 0.f);
 	
 	SetHealth(CurrentHealth - Amount);
-	DamagedEvent.Broadcast(CurrentHealth, MaxHealth);
 }
 
 void UCUHealthComponent::Heal(const float& Amount)
@@ -44,7 +52,6 @@ void UCUHealthComponent::Heal(const float& Amount)
 	check(Amount > 0.f);
 
 	SetHealth(CurrentHealth + Amount);
-	HealedEvent.Broadcast();
 }
 
 void UCUHealthComponent::SetHealth(const float& NewHealth)
@@ -58,13 +65,10 @@ void UCUHealthComponent::SetHealth(const float& NewHealth)
 void UCUHealthComponent::OnRep_CurrentHealth()
 {	
 	if (CurrentHealth < LastHealthAmount)
-	{
 		DamagedEvent.Broadcast(CurrentHealth, MaxHealth);
-	}
-	else
-	{
-		HealedEvent.Broadcast();
-	}
+	
+	if (CurrentHealth > LastHealthAmount)
+		HealedEvent.Broadcast(CurrentHealth, MaxHealth);
 
 	LastHealthAmount = CurrentHealth;
 }

@@ -15,8 +15,14 @@ void ACUDamageBullet::ProcessHit(AActor* Target)
 		if (auto HealthComponent = Target->FindComponentByClass<UCUHealthComponent>())
 		{
 			HealthComponent->TakeDamage(Damage);
+			InstigatorData.OwnerHealth->Heal(Damage);
 		}
 	}
 
 	Super::ProcessHit(Target);
+}
+
+void ACUDamageBullet::Init(FBulletOwnerData OwnerData)
+{
+	this->InstigatorData = OwnerData;
 }

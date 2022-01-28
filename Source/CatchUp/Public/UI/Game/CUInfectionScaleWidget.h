@@ -20,6 +20,6 @@ private:
 
 public:
 	
-	void OnDamaged(const float& NewHealth, const float& MaxHealth);
+	void OnHealthChanged(const float& NewHealth, const float& MaxHealth);
 	
 };

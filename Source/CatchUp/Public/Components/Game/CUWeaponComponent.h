@@ -9,6 +9,7 @@
 DECLARE_MULTICAST_DELEGATE_OneParam(FActiveChanged, const bool&);
 
 class ACUWeapon;
+class UCUHealthComponent;
 
 UCLASS(ClassGroup = (CatchUp), meta = (BlueprintSpawnableComponent))
 class CATCHUP_API UCUWeaponComponent : public UActorComponent
@@ -24,6 +25,9 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<ACUWeapon> WeaponClass;
 
+	UPROPERTY()
+	UCUHealthComponent* OwnerHealth;
+	
 	UPROPERTY()
 	APlayerController* Owner;
 	
@@ -42,7 +46,7 @@ protected:
 	
 public:
 
-	void SetController(APlayerController* NewOwner);
+	void Reset(APlayerController* NewOwner);
 	
 	void Fire();
 

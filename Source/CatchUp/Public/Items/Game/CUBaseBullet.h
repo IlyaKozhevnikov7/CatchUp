@@ -11,6 +11,19 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FHit, class ACUBaseBullet*);
 class ACUCharacter;
 class USphereComponent;
 class UProjectileMovementComponent;
+class UCUHealthComponent;
+
+USTRUCT()
+struct FBulletOwnerData
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY()
+	UCUHealthComponent* OwnerHealth;
+	
+};
 
 UCLASS(Abstract)
 class CATCHUP_API ACUBaseBullet : public AActor
@@ -31,8 +44,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	UProjectileMovementComponent* Movement;
-
+	
 	bool bIsActive;
+
+protected:
+
+	FBulletOwnerData InstigatorData;
 	
 protected:
 
@@ -47,6 +64,8 @@ public:
 
 	FORCEINLINE bool IsActive() const { return bIsActive; }
 
+	virtual void Init(FBulletOwnerData OwnerData) { }
+	
 	UFUNCTION(NetMulticast, Reliable)
 	void Launch();
 	

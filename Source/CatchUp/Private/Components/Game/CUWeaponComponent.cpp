@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CUWeaponComponent.h"
+#include "CUHealthComponent.h"
 #include "CatchUpMacros.h"
 #include "CUBaseBullet.h"
 #include "CUSkeletalMeshComponent.h"
@@ -32,6 +33,9 @@ void UCUWeaponComponent::BeginPlay()
 		check(Mesh);
 
 		Weapon->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
+		
+		OwnerHealth = GetOwner()->FindComponentByClass<UCUHealthComponent>();
+		check(OwnerHealth);
 	}
 }
 
@@ -49,7 +53,7 @@ void UCUWeaponComponent::OnRep_IsActive()
 	ActiveChangedEvent.Broadcast(IsActive());
 }
 
-void UCUWeaponComponent::SetController(APlayerController* NewOwner)
+void UCUWeaponComponent::Reset(APlayerController* NewOwner)
 {
 	check(COMPONENT_HAS_AUTHORITY);
 
@@ -117,9 +121,11 @@ void UCUWeaponComponent::FireServer_Implementation()
 	GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params);
 
 	const FVector Target = Hit.bBlockingHit ? Hit.ImpactPoint : End;
-	
 	DrawDebugBox(GetWorld(), Target, FVector(5.f), FColor::Magenta, false, 5.f, 0, 5.f);
-	Weapon->Fire(Target);
+	FBulletOwnerData InstigatorData;
+	InstigatorData.OwnerHealth = OwnerHealth;
+	
+	Weapon->Fire(Target, InstigatorData);
 }
 
 bool UCUWeaponComponent::FireServer_Validate()

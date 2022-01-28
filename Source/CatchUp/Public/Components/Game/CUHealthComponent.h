@@ -3,12 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CatchUpTypes.h"
 #include "Components/ActorComponent.h"
 #include "CUHealthComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FDamaged, const float&, const float&);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FHealed, const float&, const float&);
 DECLARE_MULTICAST_DELEGATE(FHealthOver);
-DECLARE_MULTICAST_DELEGATE(FHealed);
 
 UCLASS(ClassGroup = (CatchUp), meta = (BlueprintSpawnableComponent))
 class CATCHUP_API UCUHealthComponent : public UActorComponent
@@ -43,6 +44,8 @@ protected:
 	
 public:
 
+	void Reset(const EGameRole& NewRole);
+	
 	void TakeDamage(const float& Amount);
 
 	void Heal(const float& Amount);

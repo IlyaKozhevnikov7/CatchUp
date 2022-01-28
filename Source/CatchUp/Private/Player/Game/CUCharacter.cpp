@@ -55,7 +55,7 @@ void ACUCharacter::PossessedBy(AController* NewController)
 void ACUCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
-
+	
 	if (auto CUPlayerState = GetPlayerState<ACUPlayerState>())
 	{
 		CUPlayerState->GameRoleChangedEvent.AddUObject(this, &ACUCharacter::OnGameRoleChanged);
@@ -71,11 +71,17 @@ void ACUCharacter::SetupDefaultState()
 // Вызывается только на сервере
 void ACUCharacter::ResetState()
 {
+	check(HasAuthority());
+	
 	const auto PlayerController = GetController<APlayerController>();
 	check(PlayerController);
+
+	const auto PlayrState = PlayerController->GetPlayerState<ACUPlayerState>();
+	check(PlayrState);
 	
-	WeaponComponent->SetController(PlayerController);
-	RoleMesh->SetRoleMesh(PlayerController->GetPlayerState<ACUPlayerState>()->GetGameRole());
+	HealthComponent->Reset(PlayrState->GetGameRole());
+	WeaponComponent->Reset(PlayerController);
+	RoleMesh->SetRoleMesh(PlayrState->GetGameRole());
 }
 
 void ACUCharacter::OnDeactivated()
@@ -89,6 +95,8 @@ void ACUCharacter::OnGameRoleChanged(const EGameRole& NewRole)
 	
 	if (HasAuthority())
 	{
+		HealthComponent->Reset(NewRole);
+		
 		if (NewRole == EGameRole::Catcher)
 			WeaponComponent->Activate(true);
 		else

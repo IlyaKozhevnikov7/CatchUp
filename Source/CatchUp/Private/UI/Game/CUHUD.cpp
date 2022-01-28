@@ -57,7 +57,10 @@ void ACUHUD::OnNewCharacter(ACUCharacter* Character)
 {
 	if (auto Health = Character->FindComponentByClass<UCUHealthComponent>())
 	{
-		Health->DamagedEvent.AddUObject(Cast<UCUInfectionScaleWidget>(AdditionalWidgets[EAdditionWidget::InfectionScale]), &UCUInfectionScaleWidget::OnDamaged);
+		const auto InfectionScaleWidget = Cast<UCUInfectionScaleWidget>(AdditionalWidgets[EAdditionWidget::InfectionScale]);
+		
+		Health->DamagedEvent.AddUObject(InfectionScaleWidget, &UCUInfectionScaleWidget::OnHealthChanged);
+		Health->HealedEvent.AddUObject(InfectionScaleWidget, &UCUInfectionScaleWidget::OnHealthChanged);
 	}
 }
 

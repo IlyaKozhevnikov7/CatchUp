@@ -3,7 +3,7 @@
 #include "CUInfectionScaleWidget.h"
 #include "Components/ProgressBar.h"
 
-void UCUInfectionScaleWidget::OnDamaged(const float& NewHealth, const float& MaxHealth)
+void UCUInfectionScaleWidget::OnHealthChanged(const float& NewHealth, const float& MaxHealth)
 {
 	InfectionScale->SetPercent(NewHealth / MaxHealth);
 }

@@ -21,4 +21,9 @@ protected:
 	ACUDamageBullet();
 
 	virtual void ProcessHit(AActor* Target) override;
+
+public:
+
+	virtual void Init(FBulletOwnerData OwnerData) override;	
+	
 };
