@@ -4,11 +4,11 @@
 #include "CUBaseWidget.h"
 #include "CUCharacter.h"
 #include "CUGameState.h"
-#include "CUHealthComponent.h"
-#include "CUInfectionScaleWidget.h"
+#include "CURunnerComponent.h"
 #include "CUMatchEndWidget.h"
 #include "CUPlayerController.h"
 #include "CUPlayerState.h"
+#include "CURunnerWidget.h"
 #include "CUStartTimerWidget.h"
 #include "CUTimerWidget.h"
 #include "Components/Button.h"
@@ -55,12 +55,12 @@ void ACUHUD::InitWidgets()
 
 void ACUHUD::OnNewCharacter(ACUCharacter* Character)
 {
-	if (auto Health = Character->FindComponentByClass<UCUHealthComponent>())
+	if (auto Health = Character->FindComponentByClass<UCURunnerComponent>())
 	{
-		const auto InfectionScaleWidget = Cast<UCUInfectionScaleWidget>(AdditionalWidgets[EAdditionWidget::InfectionScale]);
+		const auto RunnerWidget = Cast<UCURunnerWidget>(RoleWidgets[EGameRole::Runner]);
 		
-		Health->DamagedEvent.AddUObject(InfectionScaleWidget, &UCUInfectionScaleWidget::OnHealthChanged);
-		Health->HealedEvent.AddUObject(InfectionScaleWidget, &UCUInfectionScaleWidget::OnHealthChanged);
+		Health->DamagedEvent.AddUObject(RunnerWidget, &UCURunnerWidget::OnHealthChanged);
+		Health->HealedEvent.AddUObject(RunnerWidget, &UCURunnerWidget::OnHealthChanged);
 	}
 }
 
@@ -83,7 +83,7 @@ void ACUHUD::OnMatchStateChanged(const EMatchState& NewState)
 		break;
 		
 	case EMatchState::InProgress:
-			ACTIVATE_ADDITIONAL_WIDGETS_ONLY(EAdditionWidget::GameTimer, EAdditionWidget::InfectionScale);
+			ACTIVATE_ADDITIONAL_WIDGETS_ONLY(EAdditionWidget::GameTimer);
 		break;
 
 	case EMatchState::Paused:

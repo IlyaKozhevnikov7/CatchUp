@@ -7,6 +7,8 @@
 #include "CUPlayerController.h"
 #include "CUPlayerStart.h"
 #include "CUPlayerState.h"
+#include "CURunnerComponent.h"
+#include "EngineUtils.h"
 #include "CatchUp/CatchUpMacros.h"
 #include "GameFramework/GameSession.h"
 
@@ -93,6 +95,12 @@ void ACUGameMode::InitCharactersPool()
 	{
 		const auto NewCharacter = GetWorld()->SpawnActor<ACUCharacter>(DefaultPawnClass);
 
+		const auto Runner = NewCharacter->FindComponentByClass<UCURunnerComponent>();
+		check(Runner);
+
+		Runner->CaughtEvent.AddUObject(this, &ACUGameMode::OnCaught);
+		
+		
 		if (NewCharacter != nullptr)
 			CharactersPool.Enqueue(NewCharacter);
 	}
@@ -278,4 +286,18 @@ AActor* ACUGameMode::FindPlayerStartByRole(const EGameRole& GameRole) const
 	}
 
 	return RightStarts[FMath::RandRange(0, RightStarts.Num() - 1)];
+}
+
+void ACUGameMode::OnCaught(AController* Runner, AController* Catcher)
+{
+	check(Runner && Catcher);
+
+	const auto RunnerState = Runner->GetPlayerState<ACUPlayerState>();
+	check(RunnerState);
+
+	const auto CatcherState = Catcher->GetPlayerState<ACUPlayerState>();
+	check(CatcherState);
+
+	RunnerState->ChangeRole(EGameRole::Catcher);
+	CatcherState->ChangeRole(EGameRole::Runner);
 }

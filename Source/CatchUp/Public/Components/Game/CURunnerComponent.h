@@ -3,16 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CatchUpTypes.h"
 #include "Components/ActorComponent.h"
-#include "CUHealthComponent.generated.h"
+#include "CURunnerComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FDamaged, const float&, const float&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FHealed, const float&, const float&);
-DECLARE_MULTICAST_DELEGATE(FHealthOver);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FCaught, AController* /* Runner */,  AController* /* Catcher */);
 
 UCLASS(ClassGroup = (CatchUp), meta = (BlueprintSpawnableComponent))
-class CATCHUP_API UCUHealthComponent : public UActorComponent
+class CATCHUP_API UCURunnerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -22,11 +21,11 @@ public:
 
 	FHealed HealedEvent;
 	
-	FHealthOver HealthOverEvent;
+	FCaught CaughtEvent;
 	
 private:
 
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
+	UPROPERTY(EditDefaultsOnly, Category = "Catch Up|Health", meta = (ClampMin = "0"))
 	float MaxHealth;
 
 	UPROPERTY(ReplicatedUsing = "OnRep_CurrentHealth")
@@ -36,7 +35,7 @@ private:
 	
 protected:
 
-	UCUHealthComponent();
+	UCURunnerComponent();
 
 	virtual void BeginPlay() override;
 
@@ -44,9 +43,9 @@ protected:
 	
 public:
 
-	void Reset(const EGameRole& NewRole);
+	void Reset();
 	
-	void TakeDamage(const float& Amount);
+	void TakeDamage(const float& Damage, AController* Instigator);
 
 	void Heal(const float& Amount);
 	

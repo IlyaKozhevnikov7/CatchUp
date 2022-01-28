@@ -11,7 +11,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FHit, class ACUBaseBullet*);
 class ACUCharacter;
 class USphereComponent;
 class UProjectileMovementComponent;
-class UCUHealthComponent;
+class UCURunnerComponent;
 
 USTRUCT()
 struct FBulletOwnerData
@@ -21,7 +21,10 @@ struct FBulletOwnerData
 public:
 
 	UPROPERTY()
-	UCUHealthComponent* OwnerHealth;
+	AController* Instigator;
+	
+	UPROPERTY()
+	UCURunnerComponent* OwnerHealth;
 	
 };
 

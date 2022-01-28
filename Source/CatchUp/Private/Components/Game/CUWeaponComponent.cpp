@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CUWeaponComponent.h"
-#include "CUHealthComponent.h"
+#include "CURunnerComponent.h"
 #include "CatchUpMacros.h"
 #include "CUBaseBullet.h"
 #include "CUSkeletalMeshComponent.h"
@@ -34,7 +34,7 @@ void UCUWeaponComponent::BeginPlay()
 
 		Weapon->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");
 		
-		OwnerHealth = GetOwner()->FindComponentByClass<UCUHealthComponent>();
+		OwnerHealth = GetOwner()->FindComponentByClass<UCURunnerComponent>();
 		check(OwnerHealth);
 	}
 }
@@ -122,7 +122,9 @@ void UCUWeaponComponent::FireServer_Implementation()
 
 	const FVector Target = Hit.bBlockingHit ? Hit.ImpactPoint : End;
 	DrawDebugBox(GetWorld(), Target, FVector(5.f), FColor::Magenta, false, 5.f, 0, 5.f);
+	
 	FBulletOwnerData InstigatorData;
+	InstigatorData.Instigator = Owner;
 	InstigatorData.OwnerHealth = OwnerHealth;
 	
 	Weapon->Fire(Target, InstigatorData);

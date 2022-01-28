@@ -9,7 +9,7 @@
 
 class ACUPlayerState;
 class UCameraComponent;
-class UCUHealthComponent;
+class UCURunnerComponent;
 class UCUWeaponComponent;
 class UCUSkeletalMeshComponent;
 
@@ -30,7 +30,7 @@ protected:
 	UCUSkeletalMeshComponent* RoleMesh;
 	
 	UPROPERTY(EditDefaultsOnly)
-	UCUHealthComponent* HealthComponent;
+	UCURunnerComponent* RunnerComponent;
 
 	UPROPERTY(EditDefaultsOnly)
 	UCUWeaponComponent* WeaponComponent;

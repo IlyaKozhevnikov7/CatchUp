@@ -13,8 +13,6 @@ ACUAmmoPool::ACUAmmoPool()
 
 void ACUAmmoPool::BeginPlay()
 {
-	check(HasAuthority());
-	
 	Super::BeginPlay();
 
 	InitPool();

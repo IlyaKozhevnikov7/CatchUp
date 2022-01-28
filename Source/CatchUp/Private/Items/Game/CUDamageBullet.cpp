@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CUDamageBullet.h"
-#include "CUHealthComponent.h"
+#include "CURunnerComponent.h"
 
 ACUDamageBullet::ACUDamageBullet()
 {
@@ -12,9 +12,9 @@ void ACUDamageBullet::ProcessHit(AActor* Target)
 {	
 	if (HasAuthority() && Target)
 	{
-		if (auto HealthComponent = Target->FindComponentByClass<UCUHealthComponent>())
+		if (auto HealthComponent = Target->FindComponentByClass<UCURunnerComponent>())
 		{
-			HealthComponent->TakeDamage(Damage);
+			HealthComponent->TakeDamage(Damage, InstigatorData.Instigator);
 			InstigatorData.OwnerHealth->Heal(Damage);
 		}
 	}
@@ -24,5 +24,5 @@ void ACUDamageBullet::ProcessHit(AActor* Target)
 
 void ACUDamageBullet::Init(FBulletOwnerData OwnerData)
 {
-	this->InstigatorData = OwnerData;
+	InstigatorData = OwnerData;
 }

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CUCharacter.h"
-#include "CUHealthComponent.h"
+#include "CURunnerComponent.h"
 #include "CUPlayerState.h"
 #include "CUWeaponComponent.h"
 #include "Camera/CameraComponent.h"
@@ -27,8 +27,8 @@ ACUCharacter::ACUCharacter(const FObjectInitializer& ObjectInitializer) : Super(
 	GetMesh()->bOwnerNoSee = true;
 	GetMesh()->CastShadow = true;
 	
-	HealthComponent = CreateDefaultSubobject<UCUHealthComponent>("HealthComponent");
-	HealthComponent->bAutoActivate = false;
+	RunnerComponent = CreateDefaultSubobject<UCURunnerComponent>("HealthComponent");
+	RunnerComponent->bAutoActivate = false;
 	
 	WeaponComponent = CreateDefaultSubobject<UCUWeaponComponent>("WeaponComponent");
 	WeaponComponent->bAutoActivate = false;
@@ -79,7 +79,7 @@ void ACUCharacter::ResetState()
 	const auto PlayrState = PlayerController->GetPlayerState<ACUPlayerState>();
 	check(PlayrState);
 	
-	HealthComponent->Reset(PlayrState->GetGameRole());
+	RunnerComponent->Reset();
 	WeaponComponent->Reset(PlayerController);
 	RoleMesh->SetRoleMesh(PlayrState->GetGameRole());
 }
@@ -94,17 +94,16 @@ void ACUCharacter::OnGameRoleChanged(const EGameRole& NewRole)
 	RoleMesh->SetRoleMesh(NewRole);
 	
 	if (HasAuthority())
-	{
-		HealthComponent->Reset(NewRole);
-		
+	{		
 		if (NewRole == EGameRole::Catcher)
+		{
 			WeaponComponent->Activate(true);
+		}
 		else
+		{
 			WeaponComponent->Deactivate();
-	}
-	else
-	{
-		
+			RunnerComponent->Reset();
+		}
 	}
 }
 

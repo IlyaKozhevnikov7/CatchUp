@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "CatchUpTypes.h"
-#include "EngineUtils.h"
 #include "GameFramework/GameModeBase.h"
 #include "CUGameMode.generated.h"
 
@@ -36,7 +35,7 @@ private:
 	int32 CurrentStartTick;
 	
 	int32 CurrentMatchTime;
-	
+
 public:
 
 	const FGameSettings& GetGameSettings() const { return GameSettings; }
@@ -76,4 +75,6 @@ private:
 	void TickStartMatch();
 
 	AActor* FindPlayerStartByRole(const EGameRole& GameRole) const;
+
+	void OnCaught(AController* Runner,  AController* Catcher);
 };

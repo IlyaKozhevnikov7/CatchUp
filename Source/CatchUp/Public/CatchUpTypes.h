@@ -71,8 +71,7 @@ enum class EAdditionWidget : uint8
 	GameTimer = 0,
 	StartTimer,
 	Pause,
-	End,
-	InfectionScale
+	End
 };
 
 // Controller
@@ -103,78 +102,19 @@ private:
 	
 };
 
-// Hit Types
+// Other
 
-/*class ACUCharacter;
-
-USTRUCT(BlueprintType)
-struct FHitBaseModifier
+USTRUCT()
+struct FDamageInfo
 {
 	GENERATED_BODY()
-
-	friend struct FHit;
-
-private:
-
-	virtual void Process(ACUCharacter* Target) const {  }
-
-};
-
-USTRUCT(BlueprintType)
-struct FHit
-{
-	GENERATED_BODY()
-
-private:
-
-	UPROPERTY(EditDefaultsOnly)
-	TArray<FHitBaseModifier> Modifiers;
 
 public:
 
-	void AddModifier(FHitBaseModifier Modifier)
-	{
-		Modifiers.Add(Modifier);
-	}
-	
-	void Process(ACUCharacter* Target) const
-	{
-		ensure(Modifiers.Num() > 0);
-		
-		for (auto Modifier : Modifiers)
-			Modifier.Process(Target);
-	}
-};
+	float Amount;
 
-USTRUCT(BlueprintType)
-struct FDamageModifier : public FHitBaseModifier
-{
-	GENERATED_BODY()
-
-private:
-
-	UPROPERTY(EditDefaultsOnly, meta = (ClampMin = "0"))
-	float Damage = 10.f;
-
-private:
-
-	virtual void Process(ACUCharacter* Target) const override;
+	UPROPERTY()
+	AController* Instigator;
 	
 };
-
-USTRUCT(BlueprintType)
-struct FSpeedModifier : public FHitBaseModifier
-{
-	GENERATED_BODY()
-
-private:
-
-	UPROPERTY(EditDefaultsOnly)
-	float SpeedMod = -10.f;
-
-private:
-
-	virtual void Process(ACUCharacter* Target) const override;
-	
-};*/
 
