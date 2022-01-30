@@ -6,6 +6,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 ACUBaseBullet::ACUBaseBullet()
 {
@@ -43,6 +44,13 @@ void ACUBaseBullet::BeginPlay()
 	}
 }
 
+void ACUBaseBullet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACUBaseBullet, bIsActive);
+}
+
 void ACUBaseBullet::ProcessHit_Implementation(AActor* Target)
 {
 	if (HasAuthority())
@@ -57,7 +65,7 @@ void ACUBaseBullet::ProcessHit_Implementation(AActor* Target)
 	}
 }
 
-void ACUBaseBullet::Launch_Implementation()
+void ACUBaseBullet::Launch()
 {
 	if (HasAuthority())
 	{
@@ -67,10 +75,6 @@ void ACUBaseBullet::Launch_Implementation()
 		
 		Movement->Velocity = GetActorForwardVector() * Movement->InitialSpeed;
 		Movement->Activate(true);
-	}
-	else
-	{
-		Mesh->SetVisibility(true, true);
 	}
 }
 
@@ -82,5 +86,10 @@ void ACUBaseBullet::OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalI
 	HitEvent.Broadcast(this); // для AmmoPool
 	
 	bIsActive = false;
+}
+
+void ACUBaseBullet::OnRep_IsActive()
+{
+	Mesh->SetVisibility(bIsActive, true);
 }
 

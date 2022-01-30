@@ -4,10 +4,10 @@
 #include "CURunnerComponent.h"
 #include "CatchUpMacros.h"
 #include "CUBaseBullet.h"
+#include "CUCharacter.h"
 #include "CUSkeletalMeshComponent.h"
 #include "CUWeapon.h"
 #include "DrawDebugHelpers.h"
-#include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
 UCUWeaponComponent::UCUWeaponComponent()
@@ -101,6 +101,26 @@ void UCUWeaponComponent::OnActiveChanged(const bool& bNewActive)
 	if (COMPONENT_HAS_AUTHORITY)
 	{
 		Weapon->SetActive(bNewActive);
+	}
+	else
+	{
+		USkeletalMeshComponent* Mesh = nullptr;
+		
+		if (GetOwner<APawn>()->IsLocallyControlled())
+		{
+			if (bNewActive == true)
+			{
+				Mesh = GetOwner<ACUCharacter>()->GetHandsMesh();
+				Weapon->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");	
+			}
+			//else
+			//{
+			//	Mesh = Cast<UCUSkeletalMeshComponent>(GetOwner<ACUCharacter>()->GetMesh());
+			//}
+		
+			//check(Mesh);
+			
+		}
 	}
 }
 

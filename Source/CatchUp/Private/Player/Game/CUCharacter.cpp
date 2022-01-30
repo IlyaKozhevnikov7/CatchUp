@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CUCharacter.h"
+
+#include "CUCharacterMovementComponent.h"
 #include "CURunnerComponent.h"
 #include "CUPlayerState.h"
 #include "CUWeaponComponent.h"
@@ -9,7 +11,10 @@
 
 DEFINE_LOG_CATEGORY_STATIC(CULogCharacter, All, All);
 
-ACUCharacter::ACUCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UCUSkeletalMeshComponent>(ACharacter::MeshComponentName))
+ACUCharacter::ACUCharacter(const FObjectInitializer& ObjectInitializer)
+: Super(ObjectInitializer
+	.SetDefaultSubobjectClass<UCUSkeletalMeshComponent>(ACharacter::MeshComponentName)
+	.SetDefaultSubobjectClass<UCUCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = false;
 
@@ -23,7 +28,8 @@ ACUCharacter::ACUCharacter(const FObjectInitializer& ObjectInitializer) : Super(
 	HandsMesh->SetupAttachment(Camera);
 	HandsMesh->bOnlyOwnerSee = true;
 	HandsMesh->CastShadow = false;
-
+	HandsMesh->SetVisibility(false);
+	
 	GetMesh()->bOwnerNoSee = true;
 	GetMesh()->CastShadow = true;
 	
@@ -55,7 +61,8 @@ void ACUCharacter::PossessedBy(AController* NewController)
 void ACUCharacter::OnRep_PlayerState()
 {
 	Super::OnRep_PlayerState();
-	
+
+	// Реализовано здесь а не в OnRep_Controller тк Controller реплицируется только на владельца
 	if (auto CUPlayerState = GetPlayerState<ACUPlayerState>())
 	{
 		CUPlayerState->GameRoleChangedEvent.AddUObject(this, &ACUCharacter::OnGameRoleChanged);
@@ -63,12 +70,6 @@ void ACUCharacter::OnRep_PlayerState()
 	}
 }
 
-void ACUCharacter::SetupDefaultState()
-{
-
-}
-
-// Вызывается только на сервере
 void ACUCharacter::ResetState()
 {
 	check(HasAuthority());
@@ -103,6 +104,13 @@ void ACUCharacter::OnGameRoleChanged(const EGameRole& NewRole)
 		{
 			WeaponComponent->Deactivate();
 			RunnerComponent->Reset();
+		}
+	}
+	else
+	{
+		if (IsLocallyControlled())
+		{
+			HandsMesh->SetVisibility(NewRole == EGameRole::Catcher);
 		}
 	}
 }

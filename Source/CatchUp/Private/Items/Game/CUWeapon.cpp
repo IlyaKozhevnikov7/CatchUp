@@ -15,7 +15,7 @@ ACUWeapon::ACUWeapon()
 	SetReplicates(true);
 	
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>("Mesh");
-	Mesh->SetVisibility(false, true);
+	Mesh->SetVisibility(true);
 }
 
 void ACUWeapon::BeginPlay()
@@ -74,6 +74,6 @@ void ACUWeapon::InitAmmoPool()
 }
 
 void ACUWeapon::OnRep_IsActive()
-{
+{	
 	ActiveChangedEvent.Broadcast(bIsActive);
 }

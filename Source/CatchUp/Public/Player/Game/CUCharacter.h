@@ -40,6 +40,8 @@ protected:
 	
 public:
 
+	FORCEINLINE USkeletalMeshComponent* GetHandsMesh() const { return HandsMesh; }
+	
 	void ResetState();
 	
 	void OnDeactivated();
@@ -58,8 +60,6 @@ private:
 	virtual void PossessedBy(AController* NewController) override;
 	
 	void OnRep_PlayerState() override;
-	
-	void SetupDefaultState();
 	
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	

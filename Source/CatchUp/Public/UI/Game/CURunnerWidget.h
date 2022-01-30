@@ -20,6 +20,8 @@ private:
 
 public:
 
+	void Activate() override;
+	
 	void OnHealthChanged(const float& NewHealth, const float& MaxHealth);
 	
 };

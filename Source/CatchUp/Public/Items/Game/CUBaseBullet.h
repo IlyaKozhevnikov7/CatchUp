@@ -47,7 +47,8 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	UProjectileMovementComponent* Movement;
-	
+
+	UPROPERTY(ReplicatedUsing = "OnRep_IsActive")
 	bool bIsActive;
 
 protected:
@@ -59,7 +60,9 @@ protected:
 	ACUBaseBullet();
 
 	virtual void BeginPlay() override;
-	
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+		
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void ProcessHit(AActor* Target);
 	
@@ -69,12 +72,14 @@ public:
 
 	virtual void Init(FBulletOwnerData OwnerData) { }
 	
-	UFUNCTION(NetMulticast, Reliable)
 	void Launch();
 	
 private:
 
 	UFUNCTION()
 	void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION()
+	void OnRep_IsActive();
 	
 };
