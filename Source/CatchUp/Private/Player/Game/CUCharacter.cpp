@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CUCharacter.h"
-
 #include "CUCharacterMovementComponent.h"
 #include "CURunnerComponent.h"
 #include "CUPlayerState.h"
 #include "CUWeaponComponent.h"
 #include "Camera/CameraComponent.h"
 #include "CUSkeletalMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY_STATIC(CULogCharacter, All, All);
 
@@ -19,7 +19,10 @@ ACUCharacter::ACUCharacter(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bCanEverTick = false;
 
 	bUseControllerRotationYaw = true;
+	AutoPossessAI = EAutoPossessAI::Disabled;
 
+	bIsSliding = false;
+	
 	Camera = CreateDefaultSubobject<UCameraComponent>("Camera");
 	Camera->SetupAttachment(RootComponent);
 	Camera->bUsePawnControlRotation = true;
@@ -40,11 +43,19 @@ ACUCharacter::ACUCharacter(const FObjectInitializer& ObjectInitializer)
 	WeaponComponent->bAutoActivate = false;
 }
 
+void ACUCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME_CONDITION(ACUCharacter, bIsSliding, COND_SimulatedOnly);
+}
+
 void ACUCharacter::PostActorCreated()
 {
 	Super::PostActorCreated();
 
 	RoleMesh = Cast<UCUSkeletalMeshComponent>(GetMesh());
+	Movement = Cast<UCUCharacterMovementComponent>(GetMovementComponent());
 	check(RoleMesh);
 }
 
@@ -52,7 +63,12 @@ void ACUCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	if (auto CUPlayerState = Cast<ACUPlayerState>(NewController->PlayerState))
+	if (HasAuthority())
+	{
+		GetCharacterMovement()->bWantsToCrouch = true;
+	}
+	
+	if (const auto CUPlayerState = Cast<ACUPlayerState>(NewController->PlayerState))
 	{
 		CUPlayerState->GameRoleChangedEvent.AddUObject(this, &ACUCharacter::OnGameRoleChanged);
 	}
@@ -138,17 +154,38 @@ void ACUCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	InputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &UCUWeaponComponent::Fire);
 	InputComponent->BindAction("StopFire", IE_Released, WeaponComponent, &UCUWeaponComponent::StopFire);
+	InputComponent->BindAction("Crouch", IE_Pressed, this, &ACUCharacter::StartCrouch);
+	InputComponent->BindAction("Crouch", IE_Released, this, &ACUCharacter::StopCrouch);
 
+	InputComponent->BindAction("Slide", IE_Pressed, Movement, &UCUCharacterMovementComponent::StartSlide);
+	InputComponent->BindAction("Slide", IE_Released, Movement, &UCUCharacterMovementComponent::StopSlide);
+	
 	InputComponent->BindAxis("MoveForward", this, &ACUCharacter::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &ACUCharacter::MoveRight);
 }
 
 void ACUCharacter::MoveForward(float Amount)
 {
-	AddMovementInput(GetActorForwardVector() * Amount);
+	if (bIsSliding == false)
+	{
+		AddMovementInput(GetActorForwardVector() * Amount);
+	}
 }
 
 void ACUCharacter::MoveRight(float Amount)
 {
-	AddMovementInput(GetActorRightVector() * Amount);
+	if (bIsSliding == false)
+	{
+		AddMovementInput(GetActorRightVector() * Amount);
+	}
+}
+
+void ACUCharacter::StartCrouch()
+{
+	GetCharacterMovement()->bWantsToCrouch = true;	
+}
+
+void ACUCharacter::StopCrouch()
+{
+	GetCharacterMovement()->bWantsToCrouch = false;
 }

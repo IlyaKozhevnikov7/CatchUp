@@ -103,23 +103,11 @@ void UCUWeaponComponent::OnActiveChanged(const bool& bNewActive)
 		Weapon->SetActive(bNewActive);
 	}
 	else
-	{
-		USkeletalMeshComponent* Mesh = nullptr;
-		
+	{		
 		if (GetOwner<APawn>()->IsLocallyControlled())
 		{
-			if (bNewActive == true)
-			{
-				Mesh = GetOwner<ACUCharacter>()->GetHandsMesh();
-				Weapon->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");	
-			}
-			//else
-			//{
-			//	Mesh = Cast<UCUSkeletalMeshComponent>(GetOwner<ACUCharacter>()->GetMesh());
-			//}
-		
-			//check(Mesh);
-			
+			const auto Mesh = bNewActive ? GetOwner<ACUCharacter>()->GetHandsMesh() : GetOwner<ACUCharacter>()->GetMesh();
+			Weapon->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "WeaponSocket");	
 		}
 	}
 }

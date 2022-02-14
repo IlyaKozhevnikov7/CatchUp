@@ -9,6 +9,7 @@
 
 class ACUPlayerState;
 class UCameraComponent;
+class UCUCharacterMovementComponent;
 class UCURunnerComponent;
 class UCUWeaponComponent;
 class UCUSkeletalMeshComponent;
@@ -17,6 +18,11 @@ UCLASS()
 class CATCHUP_API ACUCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	bool bIsSliding;
 	
 protected:
 
@@ -28,6 +34,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	UCUSkeletalMeshComponent* RoleMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	UCUCharacterMovementComponent* Movement;
 	
 	UPROPERTY(EditDefaultsOnly)
 	UCURunnerComponent* RunnerComponent;
@@ -52,9 +61,11 @@ public:
 	float GetDirection() const;
 	
 private:
-
+	
 	ACUCharacter(const FObjectInitializer& ObjectInitializer);
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	virtual void PostActorCreated() override;
 
 	virtual void PossessedBy(AController* NewController) override;
@@ -66,5 +77,9 @@ private:
 	void MoveForward(float Amount);
 	
 	void MoveRight(float Amount);
+
+	void StartCrouch();
+
+	void StopCrouch();
 	
 };
