@@ -64,8 +64,6 @@ private:
 	float CurrentSlideTime;
 	
 	bool bSlidePressed;
-
-	bool* bCharacterIsSliding;
 	
 public:
 
@@ -84,8 +82,6 @@ private:
 	virtual FNetworkPredictionData_Client* GetPredictionData_Client() const override;
 
 	virtual void PerformMovement(float DeltaTime) override;
-	
-	//virtual void ControlledCharacterMove(const FVector& InputVector, float DeltaSeconds) override;
 	
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 

@@ -44,9 +44,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	UCUWeaponComponent* WeaponComponent;
 	
-	UPROPERTY(EditDefaultsOnly)
-	TMap<EGameRole, FColor> RoleColors;
-	
 public:
 
 	FORCEINLINE USkeletalMeshComponent* GetHandsMesh() const { return HandsMesh; }

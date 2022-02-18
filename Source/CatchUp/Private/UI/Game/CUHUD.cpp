@@ -133,7 +133,7 @@ void ACUHUD::ActivateAdditionalWidget(const EAdditionWidget& Type) const
 
 void ACUHUD::DeactivateAllAdditionalWidgets() const
 {
-	for (auto Widget : AdditionalWidgets)
+	for (const auto Widget : AdditionalWidgets)
 	{
 		if (Widget.Value->IsActive())
 			Widget.Value->Deactivate();

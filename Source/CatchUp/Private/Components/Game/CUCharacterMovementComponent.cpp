@@ -99,14 +99,15 @@ void UCUCharacterMovementComponent::PerformMovement(float DeltaTime)
 	if (bSlidePressed && CanSlide())
 	{
 		SlideDirection = CharacterOwner->GetActorForwardVector();
-		CurrentSlideTime = 1.2f; // sliding time (sec)
+		CurrentSlideTime = 0.9f; // sliding time (sec)
 		CUCharacter->bIsSliding = true;
+		Crouch();
 	}
 
 	if (bSlidePressed && CUCharacter->bIsSliding)
 	{
 		const FVector CurrentLocation = CharacterOwner->GetActorLocation();
-		const FVector DeltaLocation = (CurrentLocation + SlideDirection * 25.f) - CurrentLocation;
+		const FVector DeltaLocation = (CurrentLocation + SlideDirection * DeltaTime * 1400.f) - CurrentLocation;
 		
 		MoveUpdatedComponent(DeltaLocation, SlideDirection.Rotation(), true);
 		CurrentSlideTime -= DeltaTime;
@@ -114,6 +115,7 @@ void UCUCharacterMovementComponent::PerformMovement(float DeltaTime)
 		if (CurrentSlideTime <= 0.f)
 		{
 			StopSlide();
+			UnCrouch();
 		}
 	}
 
@@ -145,6 +147,7 @@ void UCUCharacterMovementComponent::StartSlide()
 void UCUCharacterMovementComponent::StopSlide()
 {
 	bSlidePressed = false;
-	GetOwner<ACUCharacter>()->bIsSliding = false;
+	CUCharacter->bIsSliding = false;
+	UnCrouch();
 }
 
